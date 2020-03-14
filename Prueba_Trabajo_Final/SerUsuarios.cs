@@ -352,7 +352,7 @@ namespace Prueba_Trabajo_Final
 
                 listarUsuarios(User, Lista);
 
-                Console.WriteLine("Inserte el numero de tarjeta del cliente que desea editar: ");
+                Console.Write("Inserte el numero de tarjeta del cliente que desea editar/eliminar: ");
                 tarjeta = Console.ReadLine();
 
                 foreach (Usuarios item in Lista.ls_Usuarios)
@@ -371,7 +371,7 @@ namespace Prueba_Trabajo_Final
 
                 else if (contador == 0)
                 {
-                    Console.Write("El numero de tarjeta ingresado no existe en el registro. Desea realizar otra busqueda? [Y] o [N]: ");
+                    Console.Write("\nEl numero de tarjeta ingresado no existe en el registro. Desea realizar otra busqueda? [Y] o [N]: ");
                     respuesta = Console.ReadLine();
 
                     if (respuesta == "N" || respuesta == "n")
@@ -455,10 +455,13 @@ namespace Prueba_Trabajo_Final
             {
                 foreach (Usuarios item in objeto.ls_Usuarios)
                 {
-                    Console.WriteLine("Nombre: {0}", item.nombre);
-                    Console.WriteLine("Apellido: {0}", item.apellido);
-                    Console.WriteLine("N. de tarjeta: {0}", item.numeroTarjeta);
-                    Console.WriteLine("");
+                    if (item.isAdmin == false) 
+                    {
+                        Console.WriteLine("Nombre: {0}", item.nombre);
+                        Console.WriteLine("Apellido: {0}", item.apellido);
+                        Console.WriteLine("N. de tarjeta: {0}", item.numeroTarjeta);
+                        Console.WriteLine("");
+                    }
                 }
             }
             catch (Exception exp)
@@ -528,11 +531,11 @@ namespace Prueba_Trabajo_Final
                 {
                     validacionTarjeta(User, mensajeLlegada, ref Lista, ref tarjeta, ref contador, ref indice, ref respuesta);
 
-                    Console.WriteLine("Esta seguro que desea elimnar al cliente: ");
-                    Console.WriteLine("N. de tarjeta: {0}", Lista.ls_Usuarios[indice].numeroTarjeta);
+                    Console.WriteLine("\nEsta seguro que desea elimnar al cliente: ");
+                    Console.WriteLine("\nN. de tarjeta: {0}", Lista.ls_Usuarios[indice].numeroTarjeta);
                     Console.WriteLine("Nombre: {0}", Lista.ls_Usuarios[indice].nombre);
                     Console.WriteLine("Apellido: {0}", Lista.ls_Usuarios[indice].apellido);
-                    Console.Write("Respuesta: [Y] o [N]: ");
+                    Console.Write("\nRespuesta: [Y] o [N]: ");
 
                     resp = Console.ReadLine();
 
@@ -547,7 +550,7 @@ namespace Prueba_Trabajo_Final
                     }
                     else if (resp == "N" || resp == "n")
                     {
-                        Console.WriteLine("Desea realizar otra busqueda [Y] o [N]? ");
+                        Console.WriteLine("\nDesea realizar otra busqueda [Y] o [N]? ");
                         string resp2 = Console.ReadLine();
 
                         if (resp2 == "N" || resp2 == "n")
@@ -590,7 +593,7 @@ namespace Prueba_Trabajo_Final
                 Console.WriteLine("Reiniciando la contrasena del cliente: {0} {1}\n", Lista.ls_Usuarios[indice].nombre, Lista.ls_Usuarios[indice].apellido);
 
                 Console.Write("Ingrese la nueva contrasena: ");
-                string nuevaContrasena = Console.ReadLine();
+                string nuevaContrasena = ReadPassword();
 
                 Lista.ls_Usuarios.Where(t => t.numeroTarjeta.Equals(tarjeta)).ToList().ForEach(t => t.contrasenya = nuevaContrasena);
 
@@ -673,7 +676,7 @@ namespace Prueba_Trabajo_Final
                     break;
 
                 case 3:
-                    Console.ReadKey();
+                    Console.Clear();
                     menuAdmin(User);
                     break;
 
@@ -710,8 +713,7 @@ namespace Prueba_Trabajo_Final
                 }
                 else if (sel == "N" || sel == "n")
                 {
-                    Console.WriteLine("Presione cualquier tecla para volver al menu.");
-                    Console.ReadKey();
+                    Console.Clear();
                     menuAdmin(User);
                 }
                 else
@@ -757,7 +759,7 @@ namespace Prueba_Trabajo_Final
         }
         public static void modo200y1000(Usuarios User)
         {
-            string tipoTrans = "Retiro";
+            string tipoTrans = "Retiro           ";
             double retiro;
             double _retiro;
             double nuevoSaldo = 0;
@@ -827,18 +829,18 @@ namespace Prueba_Trabajo_Final
 
                 if (cantidadDe1000 > 0)
                 {
-                    Console.WriteLine("{0} Papeletas de 1,000.00", cantidadDe1000);
+                    Console.WriteLine("\n{0} Papeletas de 1,000.00", cantidadDe1000);
                 }
                 if (cantidadDe200 > 0)
                 {
                     Console.WriteLine("{0} Papeletas de 200.00", cantidadDe200);
                 }
 
-                Console.ReadKey();
-
                 llenarTrans(User.numeroTarjeta, tipoTrans, retiro, User.saldo, nuevoSaldo, DateTime.Now, Lista);
 
                 serializacion("banco.dat", Lista);
+
+                repetirTransaccion(User);
             }
             catch (Exception exp)
             {
@@ -849,7 +851,7 @@ namespace Prueba_Trabajo_Final
         }
         public static void modo100y500(Usuarios User)
         {
-            string tipoTrans = "Retiro";
+            string tipoTrans = "Retiro           ";
             double retiro;
             double _retiro;
             double nuevoSaldo = 0;
@@ -919,18 +921,18 @@ namespace Prueba_Trabajo_Final
 
                 if (cantidadDe500 > 0)
                 {
-                    Console.WriteLine("{0} Papeletas de 500.00", cantidadDe500);
+                    Console.WriteLine("\n{0} Papeletas de 500.00", cantidadDe500);
                 }
                 if (cantidadDe100 > 0)
                 {
                     Console.WriteLine("{0} Papeletas de 100.00", cantidadDe100);
                 }
 
-                Console.ReadKey();
-
                 llenarTrans(User.numeroTarjeta, tipoTrans, retiro, User.saldo, nuevoSaldo, DateTime.Now, Lista);
 
                 serializacion("banco.dat", Lista);
+
+                repetirTransaccion(User);
             }
             catch (Exception exp)
             {
@@ -941,7 +943,7 @@ namespace Prueba_Trabajo_Final
         }
         public static void modo100a1000(Usuarios User)
         {
-            string tipoTrans = "Retiro";
+            string tipoTrans = "Retiro           ";
             double retiro;
             double _retiro;
             double nuevoSaldo = 0;
@@ -1023,18 +1025,27 @@ namespace Prueba_Trabajo_Final
 
                 if (cantidadDe1000 > 0)
                 {
-                    Console.WriteLine("{0} Papeletas de 1,000.00", cantidadDe1000);
+                    Console.WriteLine("\n{0} Papeletas de 1,000.00", cantidadDe1000);
+                }
+                if (cantidadDe500 > 0)
+                {
+                    Console.WriteLine("{0} Papeletas de 500.00", cantidadDe500);
                 }
                 if (cantidadDe200 > 0)
                 {
                     Console.WriteLine("{0} Papeletas de 200.00", cantidadDe200);
                 }
+                if (cantidadDe100 > 0)
+                {
+                    Console.WriteLine("{0} Papeletas de 100.00", cantidadDe100);
+                }
 
-                Console.ReadKey();
 
                 llenarTrans(User.numeroTarjeta, tipoTrans, retiro, User.saldo, nuevoSaldo, DateTime.Now, Lista);
 
                 serializacion("banco.dat", Lista);
+
+                repetirTransaccion(User);
             }
             catch (Exception exp)
             {
@@ -1089,17 +1100,24 @@ namespace Prueba_Trabajo_Final
         }
         public static void verLogTrans(Usuarios User)
         {
-            string n_tarjeta = "";
-
-            ListaUsuarios Lista;
-
-            Lista = deserializacion();
-
-            Console.Write("Inserte el numero de tarjeta del cliente que desea ver transacciones: ");
-            
             try
             {
-                n_tarjeta = Console.ReadLine();
+                string n_tarjeta = "";
+                int contador = 0;
+                int indice = 9;
+                string respuesta = "";
+                string mensajeLlegada = "Menu para ver log de transacciones\n";
+
+
+                ListaUsuarios Lista;
+                Lista = deserializacion();
+
+                listarUsuarios(User, Lista);
+
+                Console.Write("\nInserte el numero de tarjeta del cliente que desea ver transacciones: ");
+
+                validacionTarjeta(User, mensajeLlegada, ref Lista, ref n_tarjeta, ref contador, ref indice, ref respuesta);
+
                 Console.WriteLine("");
                 foreach (Usuarios item in Lista.ls_Usuarios)
                 {
@@ -1136,24 +1154,72 @@ namespace Prueba_Trabajo_Final
             try
             {
                 Console.Clear();
-                Console.WriteLine("Inserte el numero de tarjeta que desea reactivar: ");
+                Console.Write("Inserte el numero de tarjeta que desea reactivar: ");
                 string n_tarjeta = Console.ReadLine();
 
                 foreach (Usuarios item in Lista.ls_Usuarios) 
                 {
+
                     if (item.numeroTarjeta.Equals(n_tarjeta))
                     {
-                        contador++;
-                        item.isActive = true;
-                        Console.WriteLine("El usuario {0} con numero de tarjeta {1} ha sido reactivado. Presione cualquier tecla para volver al menu.", item.nombre, item.numeroTarjeta);
+                        if (item.isActive == true)
+                        {
+                            Console.WriteLine("\nEl cliente que trata de activar, ya esta activo. Desea introducir un nuevo numero de tarjeta? [Y] o [N]");
+                            string resp = Console.ReadLine();
 
-                        serializacion("banco.dat", Lista);
+                            if (resp == "Y" || resp == "y")
+                            {
+                                Console.Clear();
+                                reactivarUser(User);
+                            }
+                            else if (resp == "N" || resp == "n") 
+                            {
+                                Console.Clear();
+                                menuAdmin(User);
+                            }
+                            else 
+                            {
+                                Console.WriteLine("\nSeleccione solo dentro de las opciones dadas. Presione cualquier tecla para volver al menu.");
+                                Console.ReadKey();
+                                Console.Clear();
+                                menuAdmin(User);
+                            }
+                        }
+                        else if (item.isActive == false) 
+                        {
+                            Console.WriteLine("\nEsta seguro que desea reactivar el usuario {0}? [Y] o [N]", item.nombre);
+                            string resp = Console.ReadLine();
+
+                            if (resp == "Y" || resp == "y")
+                            {
+                                contador++;
+                                item.isActive = true;
+                                Console.WriteLine("\nEl usuario {0} con numero de tarjeta {1} ha sido reactivado. Presione cualquier tecla para volver al menu.", item.nombre, item.numeroTarjeta);
+                                Console.ReadKey();
+                                serializacion("banco.dat", Lista);
+
+                                Console.Clear();
+                                menuAdmin(User);
+                            }
+                            else if (resp == "N" || resp == "n")
+                            {
+                                Console.Clear();
+                                menuAdmin(User);
+                            }
+                            else
+                            {
+                                Console.WriteLine("\nSeleccione solo dentro de las opciones dadas. Presione cualquier tecla para volver al menu.");
+                                Console.ReadKey();
+                                Console.Clear();
+                                menuAdmin(User);
+                            }
+                        }
                     }
                 }
 
                 if (contador == 0)
                 {
-                    Console.WriteLine("El numero de tarjeta ingresado no existe. Presione cualquier tecla para volver al menu.");
+                    Console.WriteLine("\nEl numero de tarjeta ingresado no existe. Presione cualquier tecla para volver al menu.");
                     Console.ReadKey();
                     Console.Clear();
                     menuAdmin(User);
@@ -1512,29 +1578,21 @@ namespace Prueba_Trabajo_Final
                     case (int)opcionesMenuClientes.RETIRAR_EFECTIVO:
                         Console.Clear();
                         retiroEfectivo(User);
-                        Console.Clear();
-                        menuClientes(User);
                         break;
 
                     case (int)opcionesMenuClientes.DEPOSITAR_EFECTIVO:
                         Console.Clear();
                         depositarEfectivo(User);
-                        Console.Clear();
-                        menuClientes(User);
                         break;
 
                     case (int)opcionesMenuClientes.COMPRAR_TARJETA_LLAMADA:
                         Console.Clear();
                         comprarTarjeta(User);
-                        Console.Clear();
-                        menuClientes(User);
                         break;
 
                     case (int)opcionesMenuClientes.CONSULTAR_BALANCE:
                         Console.Clear();
                         consultaBalance(User);
-                        Console.Clear();
-                        menuClientes(User);
                         break;
 
                     case (int)opcionesMenuClientes.SALIR:
@@ -1595,6 +1653,10 @@ namespace Prueba_Trabajo_Final
                 llenarTrans(User.numeroTarjeta, tipoTrans, 0, User.saldo, User.saldo, DateTime.Now, Lista);
 
                 serializacion("banco.dat", Lista);
+
+                repetirTransaccion(User);
+
+
             }
             catch (Exception exp)
             {
@@ -1608,7 +1670,7 @@ namespace Prueba_Trabajo_Final
         }
         public static void depositarEfectivo(Usuarios User)
         {
-            string tipoTrans = "Deposito";
+            string tipoTrans = "Deposito         ";
 
             try
             {
@@ -1653,14 +1715,13 @@ namespace Prueba_Trabajo_Final
                 }
                 else
                 {
-                    Console.WriteLine("\nLa entrada de dinero debe ser multiplos de cien. Presione cualquier tecla para volver al menu.");
+                    Console.WriteLine("\nLa entrada de dinero debe ser multiplos de 100.00 RD$. Presione cualquier tecla para volver al menu.");
                     Console.ReadKey();
                     Console.Clear();
                     menuClientes(User);
                 }
 
-                Console.WriteLine("\n\nPresione cualquier tecla para volver al menu principal.");
-                Console.ReadKey();
+                repetirTransaccion(User);
             }
             catch (Exception exp)
             {
@@ -1688,7 +1749,7 @@ namespace Prueba_Trabajo_Final
                     break;
             }
 
-            Console.WriteLine("Presione cualquier tecla para volver al menu.");
+            Console.WriteLine("\nPresione cualquier tecla para volver al menu.");
         }
         public static void comprarTarjeta(Usuarios User)
         {
@@ -1827,9 +1888,33 @@ namespace Prueba_Trabajo_Final
             llenarTrans(User.numeroTarjeta, tipoTrans, montos, User.saldo, saldoNuevo, DateTime.Now, Lista);
 
             serializacion("banco.dat", Lista);
-            Console.WriteLine("\nPresione cualquier tecla para volver al menu.");
-            Console.ReadKey();
 
+            repetirTransaccion(User);
+
+        }
+        public static void repetirTransaccion(Usuarios User) 
+        {
+            Console.Write("\n\nDesea realizar alguna otra transaccion [Y] o [N]? ");
+
+            string resp = Console.ReadLine();
+
+            if (resp == "Y" || resp == "y")
+            {
+                Console.Clear();
+                menuClientes(User);
+            }
+            else if (resp == "N" || resp == "n")
+            {
+                Console.Clear();
+                login();
+            }
+            else
+            {
+                Console.WriteLine("\n\nDebe elegir solo [Y] o [N]. Presione cualquier tecla para volver al menu.");
+                Console.ReadKey();
+                Console.Clear();
+                menuClientes(User);
+            }
         }
         public static void llenarTrans(string n_tarjeta, string t_trans, double m_trans, double b_anterior, double b_nuevo, DateTime date, ListaUsuarios Lista) 
         {
