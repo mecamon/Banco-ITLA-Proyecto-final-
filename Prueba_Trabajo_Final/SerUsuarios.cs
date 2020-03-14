@@ -39,6 +39,40 @@ namespace Prueba_Trabajo_Final
             DE_100_500,
             DE_100_200_500_1000,
         }
+        public static string ReadPassword()
+        {
+            string password = "";
+            ConsoleKeyInfo info = Console.ReadKey(true);
+            while (info.Key != ConsoleKey.Enter)
+            {
+                if (info.Key != ConsoleKey.Backspace)
+                {
+                    Console.Write("*");
+                    password += info.KeyChar;
+                }
+                else if (info.Key == ConsoleKey.Backspace)
+                {
+                    if (!string.IsNullOrEmpty(password))
+                    {
+                        // remove one character from the list of password characters
+                        password = password.Substring(0, password.Length - 1);
+                        // get the location of the cursor
+                        int pos = Console.CursorLeft;
+                        // move the cursor to the left by one character
+                        Console.SetCursorPosition(pos - 1, Console.CursorTop);
+                        // replace it with space
+                        Console.Write(" ");
+                        // move the cursor to the left by one character again
+                        Console.SetCursorPosition(pos - 1, Console.CursorTop);
+                    }
+                }
+                info = Console.ReadKey(true);
+            }
+
+            // add a new line because user pressed enter at the end of their password
+            Console.WriteLine();
+            return password;
+        }
         public static void serializacion(string nombre, ListaUsuarios objeto) //Metodo para serializar
         {
             IFormatter formatter = new BinaryFormatter();
@@ -90,7 +124,8 @@ namespace Prueba_Trabajo_Final
                     {
                         Console.Clear();
                         Console.Write("Ingrese su contrasena: ");
-                        contrasenya = Console.ReadLine();
+                        contrasenya = ReadPassword();
+                        
 
                         foreach (Usuarios item in Lista.ls_Usuarios)
                         {
@@ -370,7 +405,10 @@ namespace Prueba_Trabajo_Final
                 usuarioNuevo.numeroTarjeta = Console.ReadLine();
 
                 Console.Write("\nInserte la contrasena del cliente nuevo: ");
-                usuarioNuevo.contrasenya = Console.ReadLine();
+                usuarioNuevo.contrasenya = ReadPassword();
+
+                //Console.Write("\nInserte la contrasena del cliente nuevo: ");
+                //usuarioNuevo.contrasenya = Console.ReadLine();
 
                 Console.Write("\nInserte el saldo inicial del cliente nuevo: ");
                 usuarioNuevo.saldo = Convert.ToInt32(Console.ReadLine());
@@ -1226,8 +1264,11 @@ namespace Prueba_Trabajo_Final
                 Console.Write("\nInserte el numero de la tarjeta del administrador nuevo: ");
                 usuarioNuevo.numeroTarjeta = Console.ReadLine();
 
+                //Console.Write("\nInserte la contrasena del administrador nuevo: ");
+                //usuarioNuevo.contrasenya = Console.ReadLine();
+
                 Console.Write("\nInserte la contrasena del administrador nuevo: ");
-                usuarioNuevo.contrasenya = Console.ReadLine();
+                usuarioNuevo.contrasenya = ReadPassword();
 
                 Console.Write("\nInserte el saldo inicial del administrador nuevo: ");
                 usuarioNuevo.saldo = Convert.ToInt32(Console.ReadLine());
