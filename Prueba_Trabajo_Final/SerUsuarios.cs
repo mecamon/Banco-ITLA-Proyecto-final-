@@ -18,7 +18,7 @@ namespace Prueba_Trabajo_Final
             EDITAR_CLIENTE,
             ELIMINAR_CLIENTE,
             REINICIAR_CONTRASENYA,
-            AGREGAR_SALDO,
+            AGREGAR_SALDO = 5,
             VER_LOG,
             CONFIGURACION_ATM,
             ADMINISTRAR_USER,
@@ -33,7 +33,7 @@ namespace Prueba_Trabajo_Final
             CONSULTAR_BALANCE,
             SALIR,
         }
-        enum opcionesModoDisp 
+        enum opcionesModoDisp
         {
             DE_200_1000 = 1,
             DE_100_500,
@@ -73,23 +73,23 @@ namespace Prueba_Trabajo_Final
             Console.WriteLine();
             return password;
         }
-        public static void serializacion(string nombre, ListaUsuarios objeto) //Metodo para serializar
+        public static void serializacion(Object objeto) //Metodo para serializar
         {
             IFormatter formatter = new BinaryFormatter();
-            Stream stream = new FileStream(nombre, FileMode.Create, FileAccess.Write, FileShare.None);
+            Stream stream = new FileStream("banco.dat", FileMode.Create, FileAccess.Write, FileShare.None);
             formatter.Serialize(stream, objeto);
             stream.Close();
         }
-        public static ListaUsuarios deserializacion() //Metodo para deserializar
+        public static List<Usuarios> deserializacion() //Metodo para deserializar
         {
-            ListaUsuarios objeto;
+            List<Usuarios> Lista;
 
             IFormatter formatter = new BinaryFormatter();
             Stream stream = new FileStream("banco.dat", FileMode.Open, FileAccess.ReadWrite, FileShare.None);
-            objeto = (ListaUsuarios)formatter.Deserialize(stream);
+            Lista = (List<Usuarios>)formatter.Deserialize(stream);
             stream.Close();
 
-            return objeto;
+            return Lista;
         }
         public static void login()
         {
@@ -102,7 +102,7 @@ namespace Prueba_Trabajo_Final
 
             try
             {
-                ListaUsuarios Lista;
+                List<Usuarios> Lista;
 
                 //Cargando listado para analizar datos dentro de el
                 Lista = deserializacion();
@@ -110,9 +110,9 @@ namespace Prueba_Trabajo_Final
                 Console.Write("Ingrese su numero de tarjeta: ");
                 tarjeta = Console.ReadLine();
 
-                foreach (Usuarios item in Lista.ls_Usuarios) 
+                foreach (Usuarios item in Lista)
                 {
-                    if (item.numeroTarjeta.Equals(tarjeta)) 
+                    if (item.numeroTarjeta.Equals(tarjeta))
                     {
                         verif = true;
                     }
@@ -125,9 +125,9 @@ namespace Prueba_Trabajo_Final
                         Console.Clear();
                         Console.Write("Ingrese su contrasena: ");
                         contrasenya = ReadPassword();
-                        
 
-                        foreach (Usuarios item in Lista.ls_Usuarios)
+
+                        foreach (Usuarios item in Lista)
                         {
                             if (item.numeroTarjeta.Equals(tarjeta) && item.contrasenya.Equals(contrasenya))
                             {
@@ -136,16 +136,16 @@ namespace Prueba_Trabajo_Final
                                     if (item.isAdmin == true)
                                     {
                                         Console.WriteLine("Bienvenido {0}\n", item.nombre);
-                                        menuAdmin(item);
+                                        menuAdmin(Lista, item);
                                         break;
                                     }
                                     else if (item.isAdmin == false)
                                     {
-                                        menuClientes(item);
+                                        menuClientes(Lista, item);
                                         break;
                                     }
                                 }
-                                else if(item.isActive == false)
+                                else if (item.isActive == false)
                                 {
                                     Console.WriteLine("Este usuario ha sido desabilidado. Comuniquese con un administrador.");
                                     Console.ReadKey();
@@ -165,9 +165,9 @@ namespace Prueba_Trabajo_Final
 
                     } while (contador < 3);
 
-                    Lista.ls_Usuarios.Where(t => t.numeroTarjeta.Equals(tarjeta)).ToList().ForEach(t => t.isActive = false);
+                    Lista.Where(t => t.numeroTarjeta.Equals(tarjeta)).ToList().ForEach(t => t.isActive = false);
 
-                    serializacion("banco.dat", Lista);
+                    serializacion( Lista);
 
                     Console.WriteLine("\nSu tarjeta numero {0} fue bloqueada por razones de seguridad. Para desbloquear comuniquese con un administrador.", tarjeta);
                     Console.ReadKey();
@@ -176,23 +176,19 @@ namespace Prueba_Trabajo_Final
 
                 }
 
-                else if (verif == false) 
+                else if (verif == false)
                 {
-                    do
-                    {
-                        Console.Clear();
-                        Console.Write("Ingrese su contrasena: ");
-                        contrasenya = Console.ReadLine();
 
-                        contador++;
+                    Console.Clear();
+                    Console.Write("Ingrese su contrasena: ");
+                    contrasenya = Console.ReadLine();
 
-                        if (contador < 3)
-                        {
-                            Console.Write("\nContrasena equivocada. Presione cualquier tecla para intentar de nuevo.");
-                            Console.ReadKey();
-                        }
 
-                    } while (contador < 3);
+                    Console.Write("\nContrasena o numero de tarjeta equivocado. Presione cualquier tecla para intentar de nuevo.");
+                    Console.ReadKey();
+                    Console.Clear();
+                    login();
+
                 }
 
             }
@@ -216,7 +212,7 @@ namespace Prueba_Trabajo_Final
 
                 Usuarios usuarioAdmin = new Usuarios(); //Objeto para agregar a listado
                 Banco userBanco = new Banco(); //Objeto para agregar a listado
-                ListaUsuarios ListaU = new ListaUsuarios();
+                List<Usuarios> ListaU = new List<Usuarios>();
 
                 usuarioAdmin.nombre = "admin";
                 usuarioAdmin.contrasenya = "admin";
@@ -225,7 +221,7 @@ namespace Prueba_Trabajo_Final
                 usuarioAdmin.isActive = true;
                 usuarioAdmin.N_banco = userBanco;
                 usuarioAdmin.N_transacciones = new List<Transacciones>();
-                ListaU.ls_Usuarios.Add(usuarioAdmin);
+                ListaU.Add(usuarioAdmin);
 
                 IFormatter formatter = new BinaryFormatter();
                 Stream stream = new FileStream("banco.dat", FileMode.Create, FileAccess.Write, FileShare.None);
@@ -233,7 +229,7 @@ namespace Prueba_Trabajo_Final
                 stream.Close();
             }
         }
-        public static void menuAdmin(Usuarios User)
+        public static void menuAdmin(List<Usuarios> Lista, Usuarios User)
         {
             Console.WriteLine("Menu de administrador. Seleccione la opcion deseada.\n");
             Console.WriteLine(" 1- Agregar cliente\n 2- Editar cliente\n 3- Eliminar cliente\n 4- Reiniciar contrasena\n 5- Agregar saldo" +
@@ -249,70 +245,68 @@ namespace Prueba_Trabajo_Final
                 {
                     case (int)opcionesMenuP.AGREGAR_CLIENTE:
                         Console.Clear();
-                        agregarCliente(User);
-                        Console.Clear();
-                        menuAdmin(User);
+                        agregarCliente(Lista, User);
                         break;
 
                     case (int)opcionesMenuP.EDITAR_CLIENTE:
                         Console.Clear();
-                        editarCliente(User);
+                        editarCliente(Lista, User);
                         Console.Clear();
-                        menuAdmin(User);
+                        menuAdmin(Lista, User);
                         break;
 
                     case (int)opcionesMenuP.ELIMINAR_CLIENTE:
                         Console.Clear();
-                        eliminarCliente(User);
+                        eliminarCliente(Lista, User);
                         Console.Clear();
-                        menuAdmin(User);
+                        menuAdmin(Lista, User);
                         break;
 
                     case (int)opcionesMenuP.REINICIAR_CONTRASENYA:
                         Console.Clear();
-                        reiniciarContrasenya(User);
+                        reiniciarContrasenya(Lista, User);
                         Console.Clear();
-                        menuAdmin(User);
+                        menuAdmin(Lista, User);
                         break;
 
                     case (int)opcionesMenuP.AGREGAR_SALDO:
                         Console.Clear();
-                        agregarSaldo(User);
+                        agregarSaldo(Lista, User);
                         Console.Clear();
-                        menuAdmin(User);
+                        menuAdmin(Lista, User);
                         break;
 
                     case (int)opcionesMenuP.VER_LOG:
                         Console.Clear();
-                        verLogTrans(User);
+                        verLogTrans(Lista, User);
                         Console.Clear();
-                        menuAdmin(User);
+                        menuAdmin(Lista, User);
                         break;
 
                     case (int)opcionesMenuP.CONFIGURACION_ATM:
                         Console.Clear();
-                        configurarATM(User);
+                        configurarATM(Lista, User);
                         Console.Clear();
-                        menuAdmin(User);
+                        menuAdmin(Lista, User);
                         break;
 
                     case (int)opcionesMenuP.ADMINISTRAR_USER:
                         Console.Clear();
-                        administrarUsuario(User);
+                        administrarUsuario(Lista, User);
                         Console.Clear();
-                        menuAdmin(User);
+                        menuAdmin(Lista, User);
                         break;
 
                     case (int)opcionesMenuP.REACTIVACION_USER:
                         Console.Clear();
-                        reactivarUser(User);
+                        reactivarUser(Lista, User);
                         Console.ReadKey();
                         Console.Clear();
-                        menuAdmin(User);
+                        menuAdmin(Lista, User);
                         break;
 
                     case (int)opcionesMenuP.CERRAR_SESION:
-                        cerrarSesion(User);
+                        cerrarSesion(Lista, User);
                         Console.WriteLine("Gracias por utilizar nuestros servicios.");
                         Console.ReadKey();
                         Environment.Exit(00);
@@ -322,7 +316,7 @@ namespace Prueba_Trabajo_Final
                         Console.WriteLine("Seleccione entre las opciones dadas.");
                         Console.WriteLine("Presione cualquier tecla para volver al menu principal.");
                         Console.ReadKey();
-                        menuAdmin(User);
+                        menuAdmin(Lista, User);
                         break;
                 }
             }
@@ -331,17 +325,17 @@ namespace Prueba_Trabajo_Final
                 Console.WriteLine("Solo se aceptan entradas de tipo entero. Trate de nuevo.");
                 Console.WriteLine("Presione cualquier tecla para volver al menu principal.");
                 Console.ReadKey();
-                menuAdmin(User);
+                menuAdmin(Lista, User);
             }
             catch (Exception exp)
             {
                 Console.WriteLine("Error: {0}", exp.Message);
                 Console.WriteLine("Presione cualquier tecla para volver al menu principal.");
                 Console.ReadKey();
-                menuAdmin(User);
+                menuAdmin(Lista, User);
             }
         }
-        public static void validacionTarjeta(Usuarios User, string mensajeLlegada, ref ListaUsuarios Lista, ref string tarjeta, ref int contador, ref int indice, ref string respuesta)
+        public static void validacionTarjeta(Usuarios User, string mensajeLlegada, ref List<Usuarios> Lista, ref string tarjeta, ref int contador, ref int indice, ref string respuesta)
         {
             do
             {
@@ -350,17 +344,17 @@ namespace Prueba_Trabajo_Final
 
                 Lista = deserializacion();//Cargando datos en objeto
 
-                listarUsuarios(User, Lista);
+                listarUsuarios(Lista, User);
 
-                Console.Write("Inserte el numero de tarjeta del cliente que desea editar/eliminar: ");
+                Console.Write("Inserte el numero de tarjeta del cliente: ");
                 tarjeta = Console.ReadLine();
 
-                foreach (Usuarios item in Lista.ls_Usuarios)
+                foreach (Usuarios item in Lista)
                 {
                     if (item.numeroTarjeta.Equals(tarjeta))
                     {
                         contador++;
-                        indice = Lista.ls_Usuarios.IndexOf(item);
+                        indice = Lista.IndexOf(item);
                     }
                 }
 
@@ -377,19 +371,17 @@ namespace Prueba_Trabajo_Final
                     if (respuesta == "N" || respuesta == "n")
                     {
                         Console.Clear();
-                        menuAdmin(User);
+                        menuAdmin(Lista, User);
                     }
                 }
             } while (respuesta == "Y" || respuesta == "y");
         }
-        public static void agregarCliente(Usuarios User)
+        public static void agregarCliente(List<Usuarios> Lista, Usuarios User)
         {
             Usuarios usuarioNuevo = new Usuarios();
             Banco userBanco = new Banco();
-            ListaUsuarios Lista;
 
-            //Deserializando
-            Lista = deserializacion();
+            string tarjeta_n;
 
             Console.WriteLine("Menu para agregar cliente\n");
 
@@ -402,7 +394,28 @@ namespace Prueba_Trabajo_Final
                 usuarioNuevo.apellido = Console.ReadLine();
 
                 Console.Write("\nInserte el numero de la tarjeta del cliente nuevo: ");
-                usuarioNuevo.numeroTarjeta = Console.ReadLine();
+                tarjeta_n = Console.ReadLine();
+
+                if (tarjeta_n.Length < 19)
+                {
+                    Console.WriteLine("\nSolo se permite formato de 0000-0000-0000-0000. Presione cualquier tecla para volver al menu.");
+                    Console.ReadKey();
+                    Console.Clear();
+                    menuAdmin(Lista, User);
+                }
+
+                foreach (Usuarios item in Lista)
+                {
+                    if (tarjeta_n.Equals(item.numeroTarjeta))
+                    {
+                        Console.WriteLine("\nEl numero de tarjeta ingresado ya esta en uso. Presione cualquier tecla para volver al menu.");
+                        Console.ReadKey();
+                        Console.Clear();
+                        menuAdmin(Lista, User);
+                    }
+                }
+
+                usuarioNuevo.numeroTarjeta = tarjeta_n;
 
                 Console.Write("\nInserte la contrasena del cliente nuevo: ");
                 usuarioNuevo.contrasenya = ReadPassword();
@@ -415,7 +428,8 @@ namespace Prueba_Trabajo_Final
 
                 userBanco.nombreBanco = "ITLA";
 
-                foreach (Usuarios item in Lista.ls_Usuarios)
+                //Para asignar modo de dispensacion actual
+                foreach (Usuarios item in Lista)
                 {
                     if (item.numeroTarjeta.Equals("0000-0000-0000-0000"))
                     {
@@ -428,34 +442,42 @@ namespace Prueba_Trabajo_Final
                 usuarioNuevo.N_banco = userBanco;
                 usuarioNuevo.N_transacciones = new List<Transacciones>();
 
-                Lista.ls_Usuarios.Add(usuarioNuevo);//Actualizando lista
+                Lista.Add(usuarioNuevo);//Actualizando lista
 
-                //Serializando nuevamente
-                serializacion("banco.dat", Lista);
+                serializacion(Lista);
 
                 Console.WriteLine("Cliente agregado de manera exitosa! Presione cualquier tecla para volver al menu.");
                 Console.ReadKey();
+
+                List<Usuarios> ListaAct;
+
+                //Cargando listado para analizar datos dentro de el
+                ListaAct = deserializacion();
+
+                Console.Clear();
+                menuAdmin(ListaAct, User);
             }
             catch (FormatException)
             {
-                Console.WriteLine("Tipo de dato ingresado equivocado.");
-                Console.WriteLine("Presione cualquier tecla para volver al menu principal.");
+                Console.WriteLine("Tipo de dato ingresado equivocado. Presione cualquier tecla para volver al menu principal.");
+                Console.ReadKey();
+                menuAdmin(Lista, User);
             }
             catch (Exception exp)
             {
                 Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al menu principal.", exp.Message);
                 Console.ReadKey();
-                menuAdmin(User);
+                menuAdmin(Lista, User);
             }
 
         }
-        public static void listarUsuarios(Usuarios User, ListaUsuarios objeto)
+        public static void listarUsuarios(List<Usuarios> Lista, Usuarios User)
         {
             try
             {
-                foreach (Usuarios item in objeto.ls_Usuarios)
+                foreach (Usuarios item in Lista)
                 {
-                    if (item.isAdmin == false) 
+                    if (item.isAdmin == false)
                     {
                         Console.WriteLine("Nombre: {0}", item.nombre);
                         Console.WriteLine("Apellido: {0}", item.apellido);
@@ -468,15 +490,13 @@ namespace Prueba_Trabajo_Final
             {
                 Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al menu.", exp.Message);
                 Console.ReadKey();
-                menuAdmin(User);
+                menuAdmin(Lista, User);
             }
         }
-        public static void editarCliente(Usuarios User)
+        public static void editarCliente(List<Usuarios> Lista, Usuarios User)
         {
             try
             {
-                Usuarios usuarioAct = new Usuarios();
-                ListaUsuarios Lista = null;
 
                 int contador = 0;
                 int indice = 9;
@@ -486,22 +506,22 @@ namespace Prueba_Trabajo_Final
 
                 validacionTarjeta(User, mensajeLlegada, ref Lista, ref tarjeta, ref contador, ref indice, ref respuesta);
 
-                Console.WriteLine("Editando cliente: {0} {1}\n", Lista.ls_Usuarios[indice].nombre, Lista.ls_Usuarios[indice].apellido);
+                Console.WriteLine("Editando cliente: {0} {1}\n", Lista[indice].nombre, Lista[indice].apellido);
 
-                Console.WriteLine("Inserte el nuevo nombre: ");
+                Console.Write("\nInserte el nuevo nombre: ");
                 string nuevoNombre = Console.ReadLine();
 
-                Console.WriteLine("Inserte el nuevo apellido: ");
+                Console.WriteLine("");
+
+                Console.Write("\nInserte el nuevo apellido: ");
                 string nuevoApellido = Console.ReadLine();
 
-                Lista.ls_Usuarios.Where(t => t.numeroTarjeta == tarjeta).ToList().ForEach(t => { t.nombre = nuevoNombre; t.apellido = nuevoApellido; });
-
-                serializacion("banco.dat", Lista); //Serializando nuevamente con cambios
+                Lista.Where(t => t.numeroTarjeta == tarjeta).ToList().ForEach(t => { t.nombre = nuevoNombre; t.apellido = nuevoApellido; });
 
                 Console.WriteLine("Edicion realizada de manera exitosa! Presione cualquier tecla para volver al menu.");
                 Console.ReadKey();
                 Console.Clear();
-                menuAdmin(User);
+                menuAdmin(Lista, User);
 
             }
             catch (Exception exp)
@@ -509,15 +529,13 @@ namespace Prueba_Trabajo_Final
                 Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al menu.", exp.Message);
                 Console.ReadKey();
                 Console.Clear();
-                menuAdmin(User);
+                menuAdmin(Lista, User);
             }
         }
-        public static void eliminarCliente(Usuarios User)
+        public static void eliminarCliente(List<Usuarios> Lista, Usuarios User)
         {
             try
             {
-                Usuarios usuarioAct = new Usuarios();
-                ListaUsuarios Lista = null;
 
                 int contador = 0;
                 int indice = 9;
@@ -532,21 +550,20 @@ namespace Prueba_Trabajo_Final
                     validacionTarjeta(User, mensajeLlegada, ref Lista, ref tarjeta, ref contador, ref indice, ref respuesta);
 
                     Console.WriteLine("\nEsta seguro que desea elimnar al cliente: ");
-                    Console.WriteLine("\nN. de tarjeta: {0}", Lista.ls_Usuarios[indice].numeroTarjeta);
-                    Console.WriteLine("Nombre: {0}", Lista.ls_Usuarios[indice].nombre);
-                    Console.WriteLine("Apellido: {0}", Lista.ls_Usuarios[indice].apellido);
+                    Console.WriteLine("\nN. de tarjeta: {0}", Lista[indice].numeroTarjeta);
+                    Console.WriteLine("Nombre: {0}", Lista[indice].nombre);
+                    Console.WriteLine("Apellido: {0}", Lista[indice].apellido);
                     Console.Write("\nRespuesta: [Y] o [N]: ");
 
                     resp = Console.ReadLine();
 
                     if (resp == "Y" || resp == "y")
                     {
-                        Lista.ls_Usuarios.RemoveAt(indice);
-                        serializacion("banco.dat", Lista); //Serializando nuevamente con cambios
+                        Lista.RemoveAt(indice);
                         Console.WriteLine("Cliente eliminado exitosamente! Presiona cualquier tecla para volver al menu.");
                         Console.ReadKey();
                         Console.Clear();
-                        menuAdmin(User);
+                        menuAdmin(Lista, User);
                     }
                     else if (resp == "N" || resp == "n")
                     {
@@ -563,7 +580,7 @@ namespace Prueba_Trabajo_Final
                         Console.WriteLine("Debe elegir solo [Y] o [N]. Presione cualquier tecla para volver al menu.");
                         Console.ReadKey();
                         Console.Clear();
-                        menuAdmin(User);
+                        menuAdmin(Lista, User);
                     }
                 } while (resp == "N" || resp == "n");
 
@@ -572,78 +589,80 @@ namespace Prueba_Trabajo_Final
             {
                 Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al menu.", exp.Message);
                 Console.ReadKey();
-                menuAdmin(User);
+                menuAdmin(Lista, User);
             }
         }
-        public static void reiniciarContrasenya(Usuarios User)
+        public static void reiniciarContrasenya(List<Usuarios> Lista, Usuarios User)
         {
             try
             {
-                Usuarios usuarioAct = new Usuarios();
-                ListaUsuarios Lista = null;
-
                 int contador = 0;
                 int indice = 9;
                 string respuesta = "";
                 string tarjeta = "";
-                string mensajeLlegada = "Menu para reiniciar contrasena de clientes\n";
+                string mensajeLlegada = "Menu para reiniciar contrasena\n";
 
                 validacionTarjeta(User, mensajeLlegada, ref Lista, ref tarjeta, ref contador, ref indice, ref respuesta);
 
-                Console.WriteLine("Reiniciando la contrasena del cliente: {0} {1}\n", Lista.ls_Usuarios[indice].nombre, Lista.ls_Usuarios[indice].apellido);
+                Console.WriteLine("Editando cliente: {0} {1}\n", Lista[indice].nombre, Lista[indice].apellido);
 
                 Console.Write("Ingrese la nueva contrasena: ");
-                string nuevaContrasena = ReadPassword();
+                string nuevaCont = ReadPassword();
 
-                Lista.ls_Usuarios.Where(t => t.numeroTarjeta.Equals(tarjeta)).ToList().ForEach(t => t.contrasenya = nuevaContrasena);
 
-                serializacion("banco.dat", Lista); //Guardando objeto ya editado
-                Console.Write("Contrasena reiniciada de manera exitosa! Presione cualquier tecla para volver al menu principal.");
+                Lista.Where(t => t.numeroTarjeta == tarjeta).ToList().ForEach(t => t.contrasenya = nuevaCont);
+
+                Console.WriteLine("\nEdicion realizada de manera exitosa! Presione cualquier tecla para volver al menu.");
                 Console.ReadKey();
+                Console.Clear();
+                menuAdmin(Lista, User);
             }
             catch (Exception exp)
             {
                 Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al menu.", exp.Message);
                 Console.ReadKey();
-                menuAdmin(User);
+                Console.Clear();
+                menuAdmin(Lista, User);
             }
         }
-        public static void agregarSaldo(Usuarios User)
+        public static void agregarSaldo(List<Usuarios> Lista, Usuarios User)
         {
             try
             {
-                Usuarios usuarioAct = new Usuarios();
-                ListaUsuarios Lista = null;
-
+                double saldoNuevo = 0;
                 int contador = 0;
                 int indice = 9;
                 string respuesta = "";
                 string tarjeta = "";
-                string mensajeLlegada = "Menu para reiniciar contrasena de clientes\n";
+                string mensajeLlegada = "Menu para agregar saldo\n";
 
                 validacionTarjeta(User, mensajeLlegada, ref Lista, ref tarjeta, ref contador, ref indice, ref respuesta);
 
-                Console.WriteLine("Agregando saldo al cliente: {0} {1}\n", Lista.ls_Usuarios[indice].nombre, Lista.ls_Usuarios[indice].apellido);
+                Console.WriteLine("Editando cliente: {0} {1}\n", Lista[indice].nombre, Lista[indice].apellido);
 
-                Console.Write("Cual es el saldo que desea agregar?: ");
-                double saldoAgregado = Convert.ToDouble(Console.ReadLine());
+                Console.Write("Inserte el saldo a agregar: ");
+                double saldoAgregar = Convert.ToDouble(Console.ReadLine());
 
-                double nuevoSaldo = saldoAgregado + Lista.ls_Usuarios[indice].saldo;
+                foreach (Usuarios item in Lista)
+                {
+                    saldoNuevo = saldoAgregar + item.saldo;
+                }
 
-                Lista.ls_Usuarios.Where(t => t.numeroTarjeta.Equals(tarjeta)).ToList().ForEach(t => t.saldo = nuevoSaldo);
+                Lista.Where(t => t.numeroTarjeta == tarjeta).ToList().ForEach(t => t.saldo = saldoNuevo);
 
-                serializacion("banco.dat", Lista); //Guardando objeto ya editado
-                Console.Write("Saldo agregado exitosamente! Presione cualquier tecla para volver al menu.");
+                Console.WriteLine("\nEdicion realizada de manera exitosa! Presione cualquier tecla para volver al menu.");
                 Console.ReadKey();
+                Console.Clear();
+                menuAdmin(Lista, User);
             }
             catch (Exception exp)
             {
                 Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al menu.", exp.Message);
                 Console.ReadKey();
-                menuAdmin(User);
+                menuAdmin(Lista, User);
             }
         }
-        public static void configurarATM(Usuarios User)
+        public static void configurarATM(List<Usuarios> Lista, Usuarios User)
         {
             Console.WriteLine("Elija la opcion deseada: ");
             Console.WriteLine("\n 1- Cambiar nombre de banco\n 2- Modo de dispensacion \n 3- Volver atras");
@@ -656,85 +675,78 @@ namespace Prueba_Trabajo_Final
             {
                 Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al menu.", exp.Message);
                 Console.ReadKey();
-                menuAdmin(User);
+                menuAdmin(Lista, User);
             }
 
             switch (opcion)
             {
                 case 1:
-                    cambiarNombreBanco(User);
+                    cambiarNombreBanco(Lista, User);
                     Console.ReadKey();
                     Console.Clear();
-                    menuAdmin(User);
+                    menuAdmin(Lista, User);
                     break;
 
                 case 2:
-                    cambiarModoDispensacion(User);
+                    cambiarModoDispensacion(Lista, User);
                     Console.ReadKey();
                     Console.Clear();
-                    menuAdmin(User);
+                    menuAdmin(Lista, User);
                     break;
 
                 case 3:
                     Console.Clear();
-                    menuAdmin(User);
+                    menuAdmin(Lista, User);
                     break;
 
                 default:
                     Console.WriteLine("Debe elegir de entre las opciones dadas. Presione cualquier tecla para volver al menu.");
                     Console.ReadKey();
-                    menuAdmin(User);
+                    menuAdmin(Lista, User);
                     break;
             }
 
         }
-        public static void cambiarNombreBanco(Usuarios User)
+        public static void cambiarNombreBanco(List<Usuarios> Lista, Usuarios User)
         {
-            ListaUsuarios Lista;
 
-            Lista = deserializacion();
-
-            Console.WriteLine("Cual es el nuevo nombre del banco");
+            Console.Write("Cual es el nuevo nombre del banco: ");
             string nuevoNombreBanco = "";
             string sel = "";
             try
             {
                 nuevoNombreBanco = Console.ReadLine();
 
-                Console.WriteLine("Esta seguro que desea hacer el cambio? [Y] o [N]");
+                Console.WriteLine("\nEsta seguro que desea hacer el cambio? [Y] o [N]");
                 sel = Console.ReadLine();
 
                 if (sel == "Y" || sel == "y")
                 {
-                    Lista.ls_Usuarios.ForEach(t => t.N_banco.nombreBanco = nuevoNombreBanco);
+                    Lista.ForEach(t => t.N_banco.nombreBanco = nuevoNombreBanco);
 
-                    serializacion("banco.dat", Lista);
                     Console.WriteLine("Presione cualquier tecla para volver al menu.");
                 }
                 else if (sel == "N" || sel == "n")
                 {
                     Console.Clear();
-                    menuAdmin(User);
+                    menuAdmin(Lista, User);
                 }
                 else
                 {
                     Console.WriteLine("Debe elegir de entre las opciones dadas. Presione cualquier tecla para volver al menu.");
                     Console.ReadKey();
-                    menuAdmin(User);
+                    menuAdmin(Lista, User);
                 }
             }
             catch (Exception exp)
             {
                 Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al menu.", exp.Message);
                 Console.ReadKey();
-                menuAdmin(User);
+                menuAdmin(Lista, User);
             }
         }
-        public static void cambiarModoDispensacion(Usuarios User)
+        public static void cambiarModoDispensacion(List<Usuarios> Lista, Usuarios User)
         {
-            ListaUsuarios Lista;
-
-            Lista = deserializacion();
 
             Console.WriteLine("A que modo de dispensacion desea cambiar?");
             Console.WriteLine("\n 1- Solo papeletas de 200.00 RD$ y 1,000.00 RD$\n 2- Solo papeletas de 100.00 RD$ y 500.00 RD$\n 3- Papeletas de 100.00 RD$, 200.00 RD$, 500.00 RD$ y 1,000.00 RD$");
@@ -744,9 +756,7 @@ namespace Prueba_Trabajo_Final
             {
                 modo = Convert.ToInt32(Console.ReadLine());
 
-                Lista.ls_Usuarios.ForEach(t => t.N_banco.modoDispensacion = modo);
-
-                serializacion("banco.dat", Lista);
+                Lista.ForEach(t => t.N_banco.modoDispensacion = modo);
 
                 Console.WriteLine("Modo de dispensacion cambiado. Presione cualquier tecla para volver al menu.");
             }
@@ -754,21 +764,27 @@ namespace Prueba_Trabajo_Final
             {
                 Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al menu.", exp.Message);
                 Console.ReadKey();
-                menuAdmin(User);
+                menuAdmin(Lista, User);
             }
         }
-        public static void modo200y1000(Usuarios User)
+        public static void modo200y1000(List<Usuarios> Lista, Usuarios User)
         {
-            string tipoTrans = "Retiro           ";
+            string tipoTrans = "Retiro             ";
             double retiro;
             double _retiro;
             double nuevoSaldo = 0;
+            double saldoAnterior = 0;
             int cantidadDe1000 = 0;
             int cantidadDe200 = 0;
             string resp = "";
-            ListaUsuarios Lista;
 
-            Lista = deserializacion();
+            foreach (Usuarios item in Lista)
+            {
+                if (User.numeroTarjeta.Equals(item.numeroTarjeta))
+                {
+                    saldoAnterior = item.saldo;
+                }
+            }
 
             try
             {
@@ -781,25 +797,49 @@ namespace Prueba_Trabajo_Final
 
                     if (_retiro % 200 != 0)
                     {
-                        Console.WriteLine("\nEste cajero solo dispensa papeletas de 1,000.00 RD$ y 200.00 RD$. Presione [Y] para intentar con otra cantidad o cualquier tecla para volver al menu.");
+                        Console.WriteLine("\nEste cajero solo dispensa papeletas de 1,000.00 RD$ y 200.00 RD$. Quiere intentar con otra cantidad? [Y] o [N].");
                         resp = Console.ReadLine();
 
-                        if (!resp.Equals("Y") || !resp.Equals("y"))
+                        if (resp == "Y" || resp == "y")
                         {
                             Console.Clear();
-                            menuClientes(User);
+                            modo200y1000(Lista, User);
+                        }
+                        else if (resp == "N" || resp == "n")
+                        {
+                            Console.Clear();
+                            login();
+                        }
+                        else
+                        {
+                            Console.WriteLine("\n\nDebe elegir solo [Y] o [N]. Presione cualquier tecla para volver al menu.");
+                            Console.ReadKey();
+                            Console.Clear();
+                            menuClientes(Lista, User);
                         }
                     }
 
                     else if (_retiro > User.saldo)
                     {
-                        Console.WriteLine("No cuenta con suficiente fondos en su cuenta. Presione [Y] para intentar con otra cantidad o cualquier tecla para volver al menu.");
+                        Console.WriteLine("No cuenta con suficiente fondos en su cuenta. Quiere intentar con otra cantidad? [Y] o [N].");
                         resp = Console.ReadLine();
 
-                        if (!resp.Equals("Y") || !resp.Equals("y"))
+                        if (resp == "Y" || resp == "y")
                         {
                             Console.Clear();
-                            menuClientes(User);
+                            modo200y1000(Lista, User);
+                        }
+                        else if (resp == "N" || resp == "n")
+                        {
+                            Console.Clear();
+                            menuClientes(Lista, User);
+                        }
+                        else
+                        {
+                            Console.WriteLine("\n\nDebe elegir solo [Y] o [N]. Presione cualquier tecla para volver al menu.");
+                            Console.ReadKey();
+                            Console.Clear();
+                            menuClientes(Lista, User);
                         }
                     }
 
@@ -825,7 +865,7 @@ namespace Prueba_Trabajo_Final
 
                 nuevoSaldo = User.saldo - retiro;
 
-                Lista.ls_Usuarios.Where(t => t.numeroTarjeta == User.numeroTarjeta).ToList().ForEach(t => t.saldo = nuevoSaldo);
+                Lista.Where(t => t.numeroTarjeta == User.numeroTarjeta).ToList().ForEach(t => t.saldo = nuevoSaldo);
 
                 if (cantidadDe1000 > 0)
                 {
@@ -836,31 +876,37 @@ namespace Prueba_Trabajo_Final
                     Console.WriteLine("{0} Papeletas de 200.00", cantidadDe200);
                 }
 
-                llenarTrans(User.numeroTarjeta, tipoTrans, retiro, User.saldo, nuevoSaldo, DateTime.Now, Lista);
+                llenarTrans(User.numeroTarjeta, tipoTrans, retiro, saldoAnterior, nuevoSaldo, DateTime.Now, Lista);
 
-                serializacion("banco.dat", Lista);
-
-                repetirTransaccion(User);
+                repetirTransaccion(Lista, User);
             }
             catch (Exception exp)
             {
-                Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al menu.", exp.Message);
+                Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al login.", exp.Message);
                 Console.ReadKey();
-                menuAdmin(User);
+                serializacion(Lista);
+                Console.Clear();
+                login();
             }
         }
-        public static void modo100y500(Usuarios User)
+        public static void modo100y500(List<Usuarios> Lista, Usuarios User)
         {
-            string tipoTrans = "Retiro           ";
+            string tipoTrans = "Retiro             ";
             double retiro;
             double _retiro;
             double nuevoSaldo = 0;
+            double saldoAnterior = 0;
             int cantidadDe500 = 0;
             int cantidadDe100 = 0;
             string resp = "";
-            ListaUsuarios Lista;
 
-            Lista = deserializacion();
+            foreach (Usuarios item in Lista)
+            {
+                if (User.numeroTarjeta.Equals(item.numeroTarjeta))
+                {
+                    saldoAnterior = item.saldo;
+                }
+            }
 
             try
             {
@@ -873,25 +919,49 @@ namespace Prueba_Trabajo_Final
 
                     if (_retiro % 100 != 0)
                     {
-                        Console.WriteLine("\nEste cajero solo dispensa papeletas de 500.00 RD$ y 100.00 RD$. Presione [Y] para intentar con otra cantidad o cualquier tecla para volver al menu.");
+                        Console.WriteLine("\nEste cajero solo dispensa papeletas de 500.00 RD$ y 100.00 RD$. Quiere intentar con otra cantidad? [Y] o [N].");
                         resp = Console.ReadLine();
 
-                        if (!resp.Equals("Y") || !resp.Equals("y"))
+                        if (resp == "Y" || resp == "y")
                         {
                             Console.Clear();
-                            menuClientes(User);
+                            modo100y500(Lista, User);
+                        }
+                        else if (resp == "N" || resp == "n")
+                        {
+                            Console.Clear();
+                            login();
+                        }
+                        else
+                        {
+                            Console.WriteLine("\n\nDebe elegir solo [Y] o [N]. Presione cualquier tecla para volver al menu.");
+                            Console.ReadKey();
+                            Console.Clear();
+                            menuClientes(Lista, User);
                         }
                     }
 
                     else if (_retiro > User.saldo)
                     {
-                        Console.WriteLine("No cuenta con suficiente fondos en su cuenta. Presione [Y] para intentar con otra cantidad o cualquier tecla para volver al menu.");
+                        Console.WriteLine("No cuenta con suficiente fondos en su cuenta. Quiere intentar con otra cantidad? [Y] o [N].");
                         resp = Console.ReadLine();
 
-                        if (!resp.Equals("Y") || !resp.Equals("y"))
+                        if (resp == "Y" || resp == "y")
                         {
                             Console.Clear();
-                            menuClientes(User);
+                            modo100y500(Lista, User);
+                        }
+                        else if (resp == "N" || resp == "n")
+                        {
+                            Console.Clear();
+                            login();
+                        }
+                        else
+                        {
+                            Console.WriteLine("\n\nDebe elegir solo [Y] o [N]. Presione cualquier tecla para volver al menu.");
+                            Console.ReadKey();
+                            Console.Clear();
+                            menuClientes(Lista, User);
                         }
                     }
 
@@ -917,7 +987,7 @@ namespace Prueba_Trabajo_Final
 
                 nuevoSaldo = User.saldo - retiro;
 
-                Lista.ls_Usuarios.Where(t => t.numeroTarjeta == User.numeroTarjeta).ToList().ForEach(t => t.saldo = nuevoSaldo);
+                Lista.Where(t => t.numeroTarjeta == User.numeroTarjeta).ToList().ForEach(t => t.saldo = nuevoSaldo);
 
                 if (cantidadDe500 > 0)
                 {
@@ -928,33 +998,39 @@ namespace Prueba_Trabajo_Final
                     Console.WriteLine("{0} Papeletas de 100.00", cantidadDe100);
                 }
 
-                llenarTrans(User.numeroTarjeta, tipoTrans, retiro, User.saldo, nuevoSaldo, DateTime.Now, Lista);
+                llenarTrans(User.numeroTarjeta, tipoTrans, retiro, saldoAnterior, nuevoSaldo, DateTime.Now, Lista);
 
-                serializacion("banco.dat", Lista);
-
-                repetirTransaccion(User);
+                repetirTransaccion(Lista, User);
             }
             catch (Exception exp)
             {
-                Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al menu.", exp.Message);
+                Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al login.", exp.Message);
                 Console.ReadKey();
-                menuAdmin(User);
+                serializacion(Lista);
+                Console.Clear();
+                login();
             }
         }
-        public static void modo100a1000(Usuarios User)
+        public static void modo100a1000(List<Usuarios> Lista, Usuarios User)
         {
-            string tipoTrans = "Retiro           ";
+            string tipoTrans = "Retiro             ";
             double retiro;
             double _retiro;
             double nuevoSaldo = 0;
+            double saldoAnterior = 0;
             int cantidadDe1000 = 0;
             int cantidadDe500 = 0;
             int cantidadDe200 = 0;
             int cantidadDe100 = 0;
             string resp = "";
-            ListaUsuarios Lista;
 
-            Lista = deserializacion();
+            foreach (Usuarios item in Lista)
+            {
+                if (User.numeroTarjeta.Equals(item.numeroTarjeta))
+                {
+                    saldoAnterior = item.saldo;
+                }
+            }
 
             try
             {
@@ -967,25 +1043,49 @@ namespace Prueba_Trabajo_Final
 
                     if (_retiro % 100 != 0)
                     {
-                        Console.WriteLine("\nEste cajero solo dispensa papeletas de 1,000.00 RD$, 500.00 RD$, 200.00 RD$ y 100.00 RD$. Presione [Y] para intentar con otra cantidad o cualquier tecla para volver al menu.");
+                        Console.WriteLine("\nEste cajero solo dispensa papeletas de 1,000.00 RD$, 500.00 RD$, 200.00 RD$ y 100.00 RD$. Quiere intentar con otra cantidad? [Y] o [N].");
                         resp = Console.ReadLine();
 
-                        if (!resp.Equals("Y") || !resp.Equals("y"))
+                        if (resp == "Y" || resp == "y")
                         {
                             Console.Clear();
-                            menuClientes(User);
+                            modo100a1000(Lista, User);
+                        }
+                        else if (resp == "N" || resp == "n")
+                        {
+                            Console.Clear();
+                            login();
+                        }
+                        else
+                        {
+                            Console.WriteLine("\n\nDebe elegir solo [Y] o [N]. Presione cualquier tecla para volver al menu.");
+                            Console.ReadKey();
+                            Console.Clear();
+                            menuClientes(Lista, User);
                         }
                     }
 
                     else if (_retiro > User.saldo)
                     {
-                        Console.WriteLine("No cuenta con suficiente fondos en su cuenta. Presione [Y] para intentar con otra cantidad o cualquier tecla para volver al menu.");
+                        Console.WriteLine("No cuenta con suficiente fondos en su cuenta. Quiere intentar con otra cantidad? [Y] o [N].");
                         resp = Console.ReadLine();
 
-                        if (!resp.Equals("Y") || !resp.Equals("y"))
+                        if (resp == "Y" || resp == "y")
                         {
                             Console.Clear();
-                            menuClientes(User);
+                            modo100a1000(Lista, User);
+                        }
+                        else if (resp == "N" || resp == "n")
+                        {
+                            Console.Clear();
+                            login();
+                        }
+                        else
+                        {
+                            Console.WriteLine("\n\nDebe elegir solo [Y] o [N]. Presione cualquier tecla para volver al menu.");
+                            Console.ReadKey();
+                            Console.Clear();
+                            menuClientes(Lista, User);
                         }
                     }
 
@@ -1021,7 +1121,7 @@ namespace Prueba_Trabajo_Final
 
                 nuevoSaldo = User.saldo - retiro;
 
-                Lista.ls_Usuarios.Where(t => t.numeroTarjeta == User.numeroTarjeta).ToList().ForEach(t => t.saldo = nuevoSaldo);
+                Lista.Where(t => t.numeroTarjeta == User.numeroTarjeta).ToList().ForEach(t => t.saldo = nuevoSaldo);
 
                 if (cantidadDe1000 > 0)
                 {
@@ -1041,30 +1141,30 @@ namespace Prueba_Trabajo_Final
                 }
 
 
-                llenarTrans(User.numeroTarjeta, tipoTrans, retiro, User.saldo, nuevoSaldo, DateTime.Now, Lista);
+                llenarTrans(User.numeroTarjeta, tipoTrans, retiro, saldoAnterior, nuevoSaldo, DateTime.Now, Lista);
 
-                serializacion("banco.dat", Lista);
-
-                repetirTransaccion(User);
+                repetirTransaccion(Lista, User);
             }
             catch (Exception exp)
             {
-                Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al menu.", exp.Message);
+                Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al login.", exp.Message);
                 Console.ReadKey();
-                menuAdmin(User);
+                serializacion(Lista);
+                Console.Clear();
+                login();
             }
         }
         public static void listar_usuarios_prueba()
         {
-            ListaUsuarios Lista;
+            List<Usuarios> Lista;
 
             try
             {
                 IFormatter formatter = new BinaryFormatter();
                 Stream stream = new FileStream("banco.dat", FileMode.Open, FileAccess.Read, FileShare.Read);
-                Lista = (ListaUsuarios)formatter.Deserialize(stream);
+                Lista = (List<Usuarios>)formatter.Deserialize(stream);
                 stream.Close();
-                foreach (Usuarios item in Lista.ls_Usuarios)
+                foreach (Usuarios item in Lista)
                 {
                     Console.WriteLine("N. de tarjeta: {0}", item.numeroTarjeta);
                     Console.WriteLine("Nombre: {0}", item.nombre);
@@ -1079,13 +1179,13 @@ namespace Prueba_Trabajo_Final
                     {
                         Console.WriteLine("No es administrador");
                     }
-                    
+
 
                     if (item.isActive)
                     {
                         Console.WriteLine("Esta activo");
                     }
-                    else 
+                    else
                     {
                         Console.WriteLine("No esta activo");
                     }
@@ -1098,7 +1198,7 @@ namespace Prueba_Trabajo_Final
                 Console.ReadKey();
             }
         }
-        public static void verLogTrans(Usuarios User)
+        public static void verLogTrans(List<Usuarios> Lista, Usuarios User)
         {
             try
             {
@@ -1108,18 +1208,14 @@ namespace Prueba_Trabajo_Final
                 string respuesta = "";
                 string mensajeLlegada = "Menu para ver log de transacciones\n";
 
-
-                ListaUsuarios Lista;
-                Lista = deserializacion();
-
-                listarUsuarios(User, Lista);
+                listarUsuarios(Lista, User);
 
                 Console.Write("\nInserte el numero de tarjeta del cliente que desea ver transacciones: ");
 
                 validacionTarjeta(User, mensajeLlegada, ref Lista, ref n_tarjeta, ref contador, ref indice, ref respuesta);
 
                 Console.WriteLine("");
-                foreach (Usuarios item in Lista.ls_Usuarios)
+                foreach (Usuarios item in Lista)
                 {
                     if (item.numeroTarjeta.Equals(n_tarjeta))
                     {
@@ -1142,14 +1238,12 @@ namespace Prueba_Trabajo_Final
             {
                 Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al menu.", exp.Message);
                 Console.ReadKey();
-                menuAdmin(User);
+                menuAdmin(Lista, User);
             }
         }
-        public static void reactivarUser(Usuarios User) 
+        public static void reactivarUser(List<Usuarios> Lista, Usuarios User)
         {
-            ListaUsuarios Lista;
             int contador = 0;
-            Lista = deserializacion();
 
             try
             {
@@ -1157,7 +1251,7 @@ namespace Prueba_Trabajo_Final
                 Console.Write("Inserte el numero de tarjeta que desea reactivar: ");
                 string n_tarjeta = Console.ReadLine();
 
-                foreach (Usuarios item in Lista.ls_Usuarios) 
+                foreach (Usuarios item in Lista)
                 {
 
                     if (item.numeroTarjeta.Equals(n_tarjeta))
@@ -1170,22 +1264,22 @@ namespace Prueba_Trabajo_Final
                             if (resp == "Y" || resp == "y")
                             {
                                 Console.Clear();
-                                reactivarUser(User);
+                                reactivarUser(Lista, User);
                             }
-                            else if (resp == "N" || resp == "n") 
+                            else if (resp == "N" || resp == "n")
                             {
                                 Console.Clear();
-                                menuAdmin(User);
+                                menuAdmin(Lista, User);
                             }
-                            else 
+                            else
                             {
                                 Console.WriteLine("\nSeleccione solo dentro de las opciones dadas. Presione cualquier tecla para volver al menu.");
                                 Console.ReadKey();
                                 Console.Clear();
-                                menuAdmin(User);
+                                menuAdmin(Lista, User);
                             }
                         }
-                        else if (item.isActive == false) 
+                        else if (item.isActive == false)
                         {
                             Console.WriteLine("\nEsta seguro que desea reactivar el usuario {0}? [Y] o [N]", item.nombre);
                             string resp = Console.ReadLine();
@@ -1196,22 +1290,22 @@ namespace Prueba_Trabajo_Final
                                 item.isActive = true;
                                 Console.WriteLine("\nEl usuario {0} con numero de tarjeta {1} ha sido reactivado. Presione cualquier tecla para volver al menu.", item.nombre, item.numeroTarjeta);
                                 Console.ReadKey();
-                                serializacion("banco.dat", Lista);
+                                serializacion(Lista);
 
                                 Console.Clear();
-                                menuAdmin(User);
+                                menuAdmin(Lista, User);
                             }
                             else if (resp == "N" || resp == "n")
                             {
                                 Console.Clear();
-                                menuAdmin(User);
+                                menuAdmin(Lista, User);
                             }
                             else
                             {
                                 Console.WriteLine("\nSeleccione solo dentro de las opciones dadas. Presione cualquier tecla para volver al menu.");
                                 Console.ReadKey();
                                 Console.Clear();
-                                menuAdmin(User);
+                                menuAdmin(Lista, User);
                             }
                         }
                     }
@@ -1222,18 +1316,18 @@ namespace Prueba_Trabajo_Final
                     Console.WriteLine("\nEl numero de tarjeta ingresado no existe. Presione cualquier tecla para volver al menu.");
                     Console.ReadKey();
                     Console.Clear();
-                    menuAdmin(User);
+                    menuAdmin(Lista, User);
                 }
 
             }
-            catch (Exception exp) 
+            catch (Exception exp)
             {
                 Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al menu.", exp.Message);
                 Console.ReadKey();
-                menuAdmin(User);
+                menuAdmin(Lista, User);
             }
         }
-        public static void administrarUsuario(Usuarios User) 
+        public static void administrarUsuario(List<Usuarios> Lista, Usuarios User)
         {
             Console.Clear();
             Console.WriteLine("Menu para administrar usuarios. Seleccione la opcion deseada: \n");
@@ -1250,45 +1344,45 @@ namespace Prueba_Trabajo_Final
 
                     case 1:
                         Console.Clear();
-                        agregarAdmin(User);
+                        agregarAdmin(Lista, User);
                         Console.ReadKey();
                         Console.Clear();
-                        menuAdmin(User);
+                        menuAdmin(Lista, User);
                         break;
 
                     case 2:
                         Console.Clear();
-                        editarAdmin(User);
+                        editarAdmin(Lista, User);
                         Console.ReadKey();
                         Console.Clear();
-                        menuAdmin(User);
+                        menuAdmin(Lista, User);
                         break;
 
                     case 3:
                         Console.Clear();
-                        listarAdmins(User);
+                        listarAdmins(Lista, User);
                         Console.ReadKey();
                         Console.Clear();
-                        menuAdmin(User);
+                        menuAdmin(Lista, User);
                         break;
 
                     case 4:
                         Console.Clear();
-                        eliminarAdmin(User);
+                        eliminarAdmin(Lista, User);
                         Console.ReadKey();
                         Console.Clear();
-                        menuAdmin(User);
+                        menuAdmin(Lista, User);
                         break;
 
                     case 5:
-                        menuAdmin(User);
+                        menuAdmin(Lista, User);
                         break;
 
 
                     default:
                         Console.WriteLine("Seleccione solo dentro de las opciones dadas. Presione cualquier tecla para volver al menu.");
                         Console.ReadKey();
-                        menuAdmin(User);
+                        menuAdmin(Lista, User);
                         break;
 
                 }
@@ -1298,24 +1392,21 @@ namespace Prueba_Trabajo_Final
                 Console.WriteLine("Solo se aceptan entradas de tipo entero. Trate de nuevo.");
                 Console.WriteLine("Presione cualquier tecla para volver al menu principal.");
                 Console.ReadKey();
-                menuAdmin(User);
+                menuAdmin(Lista, User);
             }
             catch (Exception exp)
             {
                 Console.WriteLine("Error: {0}", exp.Message);
                 Console.WriteLine("Presione cualquier tecla para volver al menu principal.");
                 Console.ReadKey();
-                menuAdmin(User);
+                menuAdmin(Lista, User);
             }
         }
-        public static void agregarAdmin(Usuarios User)
+        public static void agregarAdmin(List<Usuarios> Lista, Usuarios User)
         {
             Usuarios usuarioNuevo = new Usuarios();
             Banco userBanco = new Banco();
-            ListaUsuarios Lista;
-
-            //Deserializando
-            Lista = deserializacion();
+            string tarjeta_n;
 
             Console.WriteLine("Menu para agregar administrador\n");
 
@@ -1328,20 +1419,36 @@ namespace Prueba_Trabajo_Final
                 usuarioNuevo.apellido = Console.ReadLine();
 
                 Console.Write("\nInserte el numero de la tarjeta del administrador nuevo: ");
-                usuarioNuevo.numeroTarjeta = Console.ReadLine();
+                tarjeta_n = Console.ReadLine();
 
-                //Console.Write("\nInserte la contrasena del administrador nuevo: ");
-                //usuarioNuevo.contrasenya = Console.ReadLine();
+                if (tarjeta_n.Length < 19)
+                {
+                    Console.WriteLine("\nSolo se permite formato de 0000-0000-0000-0000. Presione cualquier tecla para volver al menu.");
+                    Console.ReadKey();
+                    Console.Clear();
+                    menuAdmin(Lista, User);
+                }
+
+                foreach (Usuarios item in Lista)
+                {
+                    if (tarjeta_n.Equals(item.numeroTarjeta))
+                    {
+                        Console.WriteLine("\nEl numero de tarjeta ingresado ya esta en uso. Presione cualquier tecla para volver al menu.");
+                        Console.ReadKey();
+                        Console.Clear();
+                        menuAdmin(Lista, User);
+                    }
+                }
+
+                usuarioNuevo.numeroTarjeta = tarjeta_n;
 
                 Console.Write("\nInserte la contrasena del administrador nuevo: ");
                 usuarioNuevo.contrasenya = ReadPassword();
 
-                Console.Write("\nInserte el saldo inicial del administrador nuevo: ");
-                usuarioNuevo.saldo = Convert.ToInt32(Console.ReadLine());
 
                 userBanco.nombreBanco = "ITLA";
 
-                foreach (Usuarios item in Lista.ls_Usuarios)
+                foreach (Usuarios item in Lista)
                 {
                     if (item.numeroTarjeta.Equals("0000-0000-0000-0000"))
                     {
@@ -1354,10 +1461,7 @@ namespace Prueba_Trabajo_Final
                 usuarioNuevo.N_banco = userBanco;
                 usuarioNuevo.N_transacciones = new List<Transacciones>();
 
-                Lista.ls_Usuarios.Add(usuarioNuevo);//Actualizando lista
-
-                //Serializando nuevamente
-                serializacion("banco.dat", Lista);
+                Lista.Add(usuarioNuevo);//Actualizando lista
 
                 Console.WriteLine("Administrador agregado de manera exitosa! Presione cualquier tecla para volver al menu.");
             }
@@ -1370,22 +1474,19 @@ namespace Prueba_Trabajo_Final
             {
                 Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al menu principal.", exp.Message);
                 Console.ReadKey();
-                menuAdmin(User);
+                menuAdmin(Lista, User);
             }
 
         }
-        public static void listarAdmins(Usuarios User)
+        public static void listarAdmins(List<Usuarios> Lista, Usuarios User)
         {
-            ListaUsuarios Lista;
-
             try
             {
-                Lista = deserializacion();
 
                 Console.WriteLine("Listando administradores: \n");
-                foreach (Usuarios item in Lista.ls_Usuarios)
+                foreach (Usuarios item in Lista)
                 {
-                    if (item.isAdmin == true) 
+                    if (item.isAdmin == true)
                     {
                         Console.WriteLine("N. de tarjeta: {0}", item.numeroTarjeta);
                         Console.WriteLine("Nombre: {0}", item.nombre);
@@ -1400,21 +1501,19 @@ namespace Prueba_Trabajo_Final
                 Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al menu principal.", exp.Message);
                 Console.ReadKey();
                 Console.Clear();
-                menuAdmin(User);
+                menuAdmin(Lista, User);
             }
         }
-        public static void eliminarAdmin(Usuarios User) 
+        public static void eliminarAdmin(List<Usuarios> Lista, Usuarios User)
         {
-            ListaUsuarios Lista;
             string n_tarjeta = "";
-            Lista = deserializacion();
             int contador = 0;
-            int pos;
+            int pos = 0;
 
             Console.WriteLine("Listando administradores: \n");
-            foreach (Usuarios item in Lista.ls_Usuarios) 
+            foreach (Usuarios item in Lista)
             {
-                if (item.isAdmin == true) 
+                if (item.isAdmin == true)
                 {
                     if (item.numeroTarjeta != User.numeroTarjeta)
                     {
@@ -1427,50 +1526,46 @@ namespace Prueba_Trabajo_Final
                 }
             }
 
-            Console.Write("Ingrese el numero de tarjeta que desea eliminar:");
+            Console.Write("Ingrese el numero de tarjeta que desea eliminar: ");
             n_tarjeta = Console.ReadLine();
 
-            foreach (Usuarios item in Lista.ls_Usuarios) 
+            foreach (Usuarios item in Lista)
             {
                 if (n_tarjeta.Equals(User.numeroTarjeta))
                 {
                     Console.WriteLine("Un usuario no se puede eliminar a si mismo! Presione cualquier tecla para volver al menu.");
+                    Console.ReadKey();
+                    Console.Clear();
+                    menuAdmin(Lista, User);
                 }
-                else if (item.numeroTarjeta.Equals(n_tarjeta)) 
+                else if (item.numeroTarjeta.Equals(n_tarjeta))
                 {
-                    pos = Lista.ls_Usuarios.IndexOf(item);
-                    Lista.ls_Usuarios.RemoveAt(pos);
-                    Console.WriteLine("Administrador elminado. Presione cualquier tecla para volver al menu.");
+                    pos = Lista.IndexOf(item);
+                    
                 }
             }
+
+            Lista.RemoveAt(pos);
+            Console.WriteLine("\nAdministrador elminado. Presione cualquier tecla para volver al menu.");
 
             if (contador == 0)
             {
                 Console.WriteLine("No hay mas administradores. Presione cualquier tecla para volver al menu.");
                 Console.ReadKey();
                 Console.Clear();
-                menuAdmin(User);
+                menuAdmin(Lista, User);
             }
-
-
-
-            serializacion("banco.dat", Lista);
         }
-        public static void editarAdmin(Usuarios User)
+        public static void editarAdmin(List<Usuarios> Lista, Usuarios User)
         {
             try
             {
-                Usuarios usuarioAct = new Usuarios();
-                ListaUsuarios Lista = null;
-
-                Lista = deserializacion();
-
                 int contador = 0;
                 string n_tarjeta = "";
                 Console.WriteLine("Menu de edicion de administradores.\n");
 
                 Console.WriteLine("Listando administradores: \n");
-                foreach (Usuarios item in Lista.ls_Usuarios)
+                foreach (Usuarios item in Lista)
                 {
                     if (item.isAdmin == true)
                     {
@@ -1485,17 +1580,17 @@ namespace Prueba_Trabajo_Final
                     }
                 }
 
-                Console.Write("Ingrese el numero de tarjeta que desea editar:");
+                Console.Write("Ingrese el numero de tarjeta que desea editar: ");
                 n_tarjeta = Console.ReadLine();
 
-                foreach (Usuarios item in Lista.ls_Usuarios)
+                foreach (Usuarios item in Lista)
                 {
                     if (n_tarjeta.Equals(User.numeroTarjeta))
                     {
-                        Console.WriteLine("Un usuario no se puede eliminar a si mismo! Presione cualquier tecla para volver al menu.");
+                        Console.WriteLine("\nUn usuario no se puede editar a si mismo! Presione cualquier tecla para volver al menu.");
                         Console.ReadKey();
                         Console.Clear();
-                        menuAdmin(User);
+                        menuAdmin(Lista, User);
                     }
                     else if (item.numeroTarjeta.Equals(n_tarjeta))
                     {
@@ -1507,25 +1602,23 @@ namespace Prueba_Trabajo_Final
                         Console.Write("\nInserte el nuevo apellido: ");
                         string nuevoApellido = Console.ReadLine();
 
-                        Lista.ls_Usuarios.Where(t => t.numeroTarjeta == n_tarjeta).ToList().ForEach(t => { t.nombre = nuevoNombre; t.apellido = nuevoApellido; });
-
-                        serializacion("banco.dat", Lista); //Serializando nuevamente con cambios
+                        Lista.Where(t => t.numeroTarjeta == n_tarjeta).ToList().ForEach(t => { t.nombre = nuevoNombre; t.apellido = nuevoApellido; });
 
                         Console.WriteLine("\nEdicion realizada de manera exitosa! Presione cualquier tecla para volver al menu.");
                     }
                 }
 
-                
+
             }
             catch (Exception exp)
             {
                 Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al menu.", exp.Message);
                 Console.ReadKey();
                 Console.Clear();
-                menuAdmin(User);
+                menuAdmin(Lista, User);
             }
         }
-        public static void cerrarSesion(Usuarios User)
+        public static void cerrarSesion(List<Usuarios> Lista, Usuarios User)
         {
             try
             {
@@ -1534,19 +1627,20 @@ namespace Prueba_Trabajo_Final
                 if (resp == "Y" || resp == "y")
                 {
                     Console.Clear();
+                    serializacion(Lista);
                     login();
                 }
                 else if (resp == "N" || resp == "n")
                 {
                     Console.Clear();
-                    menuAdmin(User);
+                    menuAdmin(Lista, User);
                 }
                 else
                 {
                     Console.WriteLine("Debe elegir solo [Y] o [N]. Presione cualquier tecla para volver al menu.");
                     Console.ReadKey();
                     Console.Clear();
-                    menuAdmin(User);
+                    menuAdmin(Lista, User);
                 }
             }
             catch (Exception exp)
@@ -1555,12 +1649,12 @@ namespace Prueba_Trabajo_Final
                 Console.WriteLine("Presione cualquier tecla para volver al menu principal.");
                 Console.ReadKey();
                 Console.Clear();
-                menuAdmin(User);
+                menuAdmin(Lista, User);
             }
         }
 
         //--------------------------------Metodos para tarjeta habiente-------------------------------------------
-        public static void menuClientes(Usuarios User)
+        public static void menuClientes(List<Usuarios> Lista, Usuarios User)
         {
             Console.Clear();
             Console.WriteLine("Sesion de: {0} {1}\n", User.nombre, User.apellido);
@@ -1577,27 +1671,28 @@ namespace Prueba_Trabajo_Final
                 {
                     case (int)opcionesMenuClientes.RETIRAR_EFECTIVO:
                         Console.Clear();
-                        retiroEfectivo(User);
+                        retiroEfectivo(Lista, User);
                         break;
 
                     case (int)opcionesMenuClientes.DEPOSITAR_EFECTIVO:
                         Console.Clear();
-                        depositarEfectivo(User);
+                        depositarEfectivo(Lista, User);
                         break;
 
                     case (int)opcionesMenuClientes.COMPRAR_TARJETA_LLAMADA:
                         Console.Clear();
-                        comprarTarjeta(User);
+                        comprarTarjeta(Lista, User);
                         break;
 
                     case (int)opcionesMenuClientes.CONSULTAR_BALANCE:
                         Console.Clear();
-                        consultaBalance(User);
+                        consultaBalance(Lista, User);
                         break;
 
                     case (int)opcionesMenuClientes.SALIR:
                         Console.WriteLine("Gracias por utilizar nuestros servicios.");
                         Console.ReadKey();
+                        serializacion(Lista);
                         Console.Clear();
                         login();
                         break;
@@ -1605,7 +1700,7 @@ namespace Prueba_Trabajo_Final
                     default:
                         Console.WriteLine("Seleccione solo dentro de las opciones dadas. Presione cualquier tecla para volver al menu.");
                         Console.ReadKey();
-                        menuClientes(User);
+                        menuClientes(Lista, User);
                         break;
 
                 }
@@ -1613,32 +1708,33 @@ namespace Prueba_Trabajo_Final
             catch (FormatException)
             {
                 Console.WriteLine("Solo se aceptan entradas de tipo entero. Trate de nuevo.");
-                Console.WriteLine("Presione cualquier tecla para volver al menu principal.");
+                Console.WriteLine("Presione cualquier tecla para volver al login.");
                 Console.ReadKey();
-                menuClientes(User);
+                serializacion(Lista);
+                login();
             }
             catch (Exception exp)
             {
                 Console.WriteLine("Error: {0}", exp.Message);
-                Console.WriteLine("Presione cualquier tecla para volver al menu principal.");
+                Console.WriteLine("Presione cualquier tecla para volver al login.");
                 Console.ReadKey();
-                menuClientes(User);
+                serializacion(Lista);
+                login();
             }
         }
-        public static void consultaBalance(Usuarios User)
+        public static void consultaBalance(List<Usuarios> Lista, Usuarios User)
         {
             string tipoTrans = "Consulta de balance";
 
             try
             {
-                ListaUsuarios Lista;
+                double saldo = 0;
 
-                Lista = deserializacion();
-
-                foreach (Usuarios item in Lista.ls_Usuarios)
+                foreach (Usuarios item in Lista)
                 {
                     if (User.numeroTarjeta == item.numeroTarjeta)
                     {
+                        saldo = item.saldo;
                         Console.WriteLine("     Banco {0}", item.N_banco.nombreBanco);
                         Console.WriteLine("");
                         Console.WriteLine("{0} {1} - {2}", item.nombre, item.apellido, item.numeroTarjeta.Substring(15));
@@ -1650,27 +1746,23 @@ namespace Prueba_Trabajo_Final
                     }
                 }
 
-                llenarTrans(User.numeroTarjeta, tipoTrans, 0, User.saldo, User.saldo, DateTime.Now, Lista);
+                llenarTrans(User.numeroTarjeta, tipoTrans, 0, saldo, saldo, DateTime.Now, Lista);
 
-                serializacion("banco.dat", Lista);
-
-                repetirTransaccion(User);
-
-
+                repetirTransaccion(Lista, User);
             }
             catch (Exception exp)
             {
                 Console.WriteLine("Error: {0}", exp.Message);
-                Console.WriteLine("Presione cualquier tecla para volver al menu principal.");
+                Console.WriteLine("Presione cualquier tecla para volver al login.");
                 Console.ReadKey();
-                menuClientes(User);
+                serializacion(Lista);
+                Console.Clear();
+                login();
             }
-            Console.WriteLine("\n\nPresione cualquier tecla para volver al menu principal.");
-            Console.ReadKey();
         }
-        public static void depositarEfectivo(Usuarios User)
+        public static void depositarEfectivo(List<Usuarios> Lista, Usuarios User)
         {
-            string tipoTrans = "Deposito         ";
+            string tipoTrans = "Deposito           ";
 
             try
             {
@@ -1679,17 +1771,24 @@ namespace Prueba_Trabajo_Final
 
                 double saldoNuevo;
 
-                ListaUsuarios Lista;
+                double saldoAnterior = 0;
 
-                Lista = deserializacion();
+                //Para almacenar balance antes de la transaccion
+                foreach (Usuarios item in Lista)
+                {
+                    if (item.numeroTarjeta.Equals(User.numeroTarjeta))
+                    {
+                        saldoAnterior = item.saldo;
+                    }
+                }
 
                 if (saldoAgregar % 100 == 0)
                 {
-                    saldoNuevo = saldoAgregar + User.saldo;
+                    saldoNuevo = saldoAgregar + saldoAnterior;
 
-                    Lista.ls_Usuarios.Where(t => t.numeroTarjeta == User.numeroTarjeta).ToList().ForEach(t => t.saldo = saldoNuevo);
+                    Lista.Where(t => t.numeroTarjeta == User.numeroTarjeta).ToList().ForEach(t => t.saldo = saldoNuevo);
 
-                    foreach (Usuarios item in Lista.ls_Usuarios)
+                    foreach (Usuarios item in Lista)
                     {
                         if (User.numeroTarjeta == item.numeroTarjeta)
                         {
@@ -1699,7 +1798,7 @@ namespace Prueba_Trabajo_Final
                             Console.WriteLine("{0} {1} - {2}", User.nombre, User.apellido, User.numeroTarjeta.Substring(15));
                             Console.WriteLine("");
                             Console.Write("Balance Anterior: ");
-                            Console.Write(User.saldo.ToString("n2"));
+                            Console.Write(saldoAnterior.ToString("n2"));
                             Console.Write(" RD$");
 
                             Console.Write("\nNuevo Balance: ");
@@ -1709,52 +1808,53 @@ namespace Prueba_Trabajo_Final
                         }
                     }
 
-                    llenarTrans(User.numeroTarjeta, tipoTrans, saldoAgregar, User.saldo, saldoNuevo, DateTime.Now, Lista);
+                    llenarTrans(User.numeroTarjeta, tipoTrans, saldoAgregar, saldoAnterior, saldoNuevo, DateTime.Now, Lista);
 
-                    serializacion("banco.dat", Lista); //Serializando de vuelta
+
                 }
                 else
                 {
                     Console.WriteLine("\nLa entrada de dinero debe ser multiplos de 100.00 RD$. Presione cualquier tecla para volver al menu.");
                     Console.ReadKey();
                     Console.Clear();
-                    menuClientes(User);
+                    menuClientes(Lista, User);
                 }
 
-                repetirTransaccion(User);
+                repetirTransaccion(Lista, User);
             }
             catch (Exception exp)
             {
                 Console.WriteLine("Error: {0}", exp.Message);
-                Console.WriteLine("\nPresione cualquier tecla para volver al menu principal.");
+                Console.WriteLine("\nPresione cualquier tecla para volver al login.");
                 Console.ReadKey();
-                menuClientes(User);
+                serializacion(Lista);
+                Console.Clear();
+                login();
             }
 
         }
-        public static void retiroEfectivo(Usuarios User)
+        public static void retiroEfectivo(List<Usuarios> Lista, Usuarios User)
         {
             switch (User.N_banco.modoDispensacion)
             {
                 case (int)opcionesModoDisp.DE_200_1000:
-                    modo200y1000(User);
+                    modo200y1000(Lista, User);
                     break;
 
                 case (int)opcionesModoDisp.DE_100_500:
-                    modo100y500(User);
+                    modo100y500(Lista, User);
                     break;
 
                 case (int)opcionesModoDisp.DE_100_200_500_1000:
-                    modo100a1000(User);
+                    modo100a1000(Lista, User);
                     break;
             }
 
             Console.WriteLine("\nPresione cualquier tecla para volver al menu.");
         }
-        public static void comprarTarjeta(Usuarios User)
+        public static void comprarTarjeta(List<Usuarios> Lista, Usuarios User)
         {
-            string tipoTrans = "Compra de tarjeta";
-
+            string tipoTrans = "Compra de tarjeta  ";
             int tarjeta = 0;
             string nombreCompania = "";
             double montos = 0;
@@ -1769,7 +1869,11 @@ namespace Prueba_Trabajo_Final
             }
             catch (Exception exp)
             {
-                Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al menu de clientes.", exp.Message);
+                Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al login", exp.Message);
+                Console.Clear();
+                serializacion(Lista);
+                Console.Clear();
+                login();
             }
 
             switch (tarjeta)
@@ -1783,17 +1887,17 @@ namespace Prueba_Trabajo_Final
                     break;
 
                 case 3:
-                    nombreCompania = "Altice";
+                    nombreCompania = "Viva";
                     break;
 
                 case 4:
-                    menuClientes(User);
+                    menuClientes(Lista, User);
                     break;
 
                 default:
                     Console.WriteLine("Debe elegir de entre las opciones dadas. Presione cualquier tecla para volver al menu de clientes.");
                     Console.ReadKey();
-                    menuClientes(User);
+                    menuClientes(Lista, User);
                     break;
             }
 
@@ -1806,9 +1910,11 @@ namespace Prueba_Trabajo_Final
             }
             catch (Exception exp)
             {
-                Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al menu de clientes.", exp.Message);
+                Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al login.", exp.Message);
                 Console.ReadKey();
-                menuClientes(User);
+                serializacion(Lista);
+                Console.Clear();
+                login();
             }
 
             switch (montosEle)
@@ -1834,33 +1940,41 @@ namespace Prueba_Trabajo_Final
                     break;
 
                 case 6:
-                    menuClientes(User);
+                    menuClientes(Lista, User);
                     break;
 
                 default:
                     Console.WriteLine("Debe elegir de entre las opciones dadas. Presione cualquier tecla para volver al menu de clientes.");
                     Console.ReadKey();
-                    menuClientes(User);
+                    menuClientes(Lista, User);
                     break;
             }
 
+
+            double saldoAnterior = 0;
+
             //Valiando si cuenta con suficiente saldo
-            if (User.saldo < montos)
+            foreach (Usuarios item in Lista)
             {
-                Console.WriteLine("Usted no cuenta con sufieciente saldo para realizar esta transaccion. Presione cualquier tecla para volver al menu.");
-                Console.ReadKey();
-                menuClientes(User);
+                if (item.numeroTarjeta.Equals(User.numeroTarjeta))
+                {
+                    saldoAnterior = item.saldo;
+
+                    if (item.saldo < montos)
+                    {
+                        Console.WriteLine("Usted no cuenta con sufieciente saldo para realizar esta transaccion. Presione cualquier tecla para volver al menu.");
+                        Console.ReadKey();
+                        menuClientes(Lista, User);
+                    }
+                }
             }
 
-            ListaUsuarios Lista;
 
-            Lista = deserializacion();
+            saldoNuevo = saldoAnterior - montos;
 
-            saldoNuevo = User.saldo - montos;
+            Lista.Where(t => t.numeroTarjeta == User.numeroTarjeta).ToList().ForEach(t => t.saldo = saldoNuevo);
 
-            Lista.ls_Usuarios.Where(t => t.numeroTarjeta == User.numeroTarjeta).ToList().ForEach(t => t.saldo = saldoNuevo);
-
-            foreach (Usuarios item in Lista.ls_Usuarios)
+            foreach (Usuarios item in Lista)
             {
                 if (User.numeroTarjeta == item.numeroTarjeta)
                 {
@@ -1875,7 +1989,7 @@ namespace Prueba_Trabajo_Final
                     Console.Write(" RD$\n");
 
                     Console.Write("Balance Anterior: ");
-                    Console.Write(User.saldo.ToString("n2"));
+                    Console.Write(saldoAnterior.ToString("n2"));
                     Console.Write(" RD$");
 
                     Console.Write("\nNuevo Balance: ");
@@ -1885,14 +1999,13 @@ namespace Prueba_Trabajo_Final
                 }
             }
 
-            llenarTrans(User.numeroTarjeta, tipoTrans, montos, User.saldo, saldoNuevo, DateTime.Now, Lista);
+            llenarTrans(User.numeroTarjeta, tipoTrans, montos, saldoAnterior, saldoNuevo, DateTime.Now, Lista);
 
-            serializacion("banco.dat", Lista);
 
-            repetirTransaccion(User);
+            repetirTransaccion(Lista, User);
 
         }
-        public static void repetirTransaccion(Usuarios User) 
+        public static void repetirTransaccion(List<Usuarios> Lista, Usuarios User)
         {
             Console.Write("\n\nDesea realizar alguna otra transaccion [Y] o [N]? ");
 
@@ -1901,11 +2014,12 @@ namespace Prueba_Trabajo_Final
             if (resp == "Y" || resp == "y")
             {
                 Console.Clear();
-                menuClientes(User);
+                menuClientes(Lista, User);
             }
             else if (resp == "N" || resp == "n")
             {
                 Console.Clear();
+                serializacion(Lista);
                 login();
             }
             else
@@ -1913,16 +2027,16 @@ namespace Prueba_Trabajo_Final
                 Console.WriteLine("\n\nDebe elegir solo [Y] o [N]. Presione cualquier tecla para volver al menu.");
                 Console.ReadKey();
                 Console.Clear();
-                menuClientes(User);
+                menuClientes(Lista, User);
             }
         }
-        public static void llenarTrans(string n_tarjeta, string t_trans, double m_trans, double b_anterior, double b_nuevo, DateTime date, ListaUsuarios Lista) 
+        public static void llenarTrans(string n_tarjeta, string t_trans, double m_trans, double b_anterior, double b_nuevo, DateTime date, List<Usuarios> Lista)
         {
 
             Transacciones trans = new Transacciones(n_tarjeta, t_trans, m_trans, b_anterior, b_nuevo, date);
 
-            Lista.ls_Usuarios.Where(t => t.numeroTarjeta.Equals(n_tarjeta)).ToList().ForEach(t => t.N_transacciones.Add(trans));
+            Lista.Where(t => t.numeroTarjeta.Equals(n_tarjeta)).ToList().ForEach(t => t.N_transacciones.Add(trans));
         }
-        
+
     }
 }
