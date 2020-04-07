@@ -181,7 +181,7 @@ namespace Prueba_Trabajo_Final
 
                     Console.Clear();
                     Console.Write("Ingrese su contrasena: ");
-                    contrasenya = Console.ReadLine();
+                    contrasenya = ReadPassword();
 
 
                     Console.Write("\nContrasena o numero de tarjeta equivocado. Presione cualquier tecla para intentar de nuevo.");
