@@ -413,7 +413,18 @@ namespace Prueba_Trabajo_Final
                 Console.Write("\nInserte el saldo inicial del cliente nuevo: ");
                 usuarioNuevo.saldo = Convert.ToInt32(Console.ReadLine());
 
-                userBanco.nombreBanco = "ITLA";
+                //userBanco.nombreBanco = "ITLA";
+
+
+                //Asignando nombre de banco del usuario original al nuevo usuario
+                foreach (Usuarios item in Lista)
+                {
+                    if (item.numeroTarjeta.Equals("0000-0000-0000-0000"))
+                    {
+                        userBanco.nombreBanco = item.N_banco.nombreBanco;
+                    }
+                }
+
 
                 //Para asignar modo de dispensacion actual
                 foreach (Usuarios item in Lista)
@@ -448,12 +459,14 @@ namespace Prueba_Trabajo_Final
             {
                 Console.WriteLine("Tipo de dato ingresado equivocado. Presione cualquier tecla para volver al menu principal.");
                 Console.ReadKey();
+                Console.Clear();
                 menuAdmin(Lista, User);
             }
             catch (Exception exp)
             {
                 Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al menu principal.", exp.Message);
                 Console.ReadKey();
+                Console.Clear();
                 menuAdmin(Lista, User);
             }
 
@@ -477,6 +490,7 @@ namespace Prueba_Trabajo_Final
             {
                 Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al menu.", exp.Message);
                 Console.ReadKey();
+                Console.Clear();
                 menuAdmin(Lista, User);
             }
         }
@@ -576,6 +590,7 @@ namespace Prueba_Trabajo_Final
             {
                 Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al menu.", exp.Message);
                 Console.ReadKey();
+                Console.Clear();
                 menuAdmin(Lista, User);
             }
         }
@@ -646,6 +661,7 @@ namespace Prueba_Trabajo_Final
             {
                 Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al menu.", exp.Message);
                 Console.ReadKey();
+                Console.Clear();
                 menuAdmin(Lista, User);
             }
         }
@@ -689,6 +705,7 @@ namespace Prueba_Trabajo_Final
                 default:
                     Console.WriteLine("Debe elegir de entre las opciones dadas. Presione cualquier tecla para volver al menu.");
                     Console.ReadKey();
+                    Console.Clear();
                     menuAdmin(Lista, User);
                     break;
             }
@@ -722,6 +739,7 @@ namespace Prueba_Trabajo_Final
                 {
                     Console.WriteLine("Debe elegir de entre las opciones dadas. Presione cualquier tecla para volver al menu.");
                     Console.ReadKey();
+                    Console.Clear();
                     menuAdmin(Lista, User);
                 }
             }
@@ -729,6 +747,7 @@ namespace Prueba_Trabajo_Final
             {
                 Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al menu.", exp.Message);
                 Console.ReadKey();
+                Console.Clear();
                 menuAdmin(Lista, User);
             }
         }
@@ -743,6 +762,14 @@ namespace Prueba_Trabajo_Final
             {
                 modo = Convert.ToInt32(Console.ReadLine());
 
+                if (modo > 3) 
+                {
+                    Console.WriteLine("Debe elegir dentro de las opciones dadas. Presione cualquier tecla para volver al menu.");
+                    Console.ReadKey();
+                    Console.Clear();
+                    menuAdmin(Lista, User);
+                }
+
                 Lista.ForEach(t => t.N_banco.modoDispensacion = modo);
 
                 Console.WriteLine("Modo de dispensacion cambiado. Presione cualquier tecla para volver al menu.");
@@ -751,52 +778,8 @@ namespace Prueba_Trabajo_Final
             {
                 Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al menu.", exp.Message);
                 Console.ReadKey();
+                Console.Clear();
                 menuAdmin(Lista, User);
-            }
-        }
-        
-        public static void listar_usuarios_prueba()
-        {
-            List<Usuarios> Lista;
-
-            try
-            {
-                IFormatter formatter = new BinaryFormatter();
-                Stream stream = new FileStream("banco.dat", FileMode.Open, FileAccess.Read, FileShare.Read);
-                Lista = (List<Usuarios>)formatter.Deserialize(stream);
-                stream.Close();
-                foreach (Usuarios item in Lista)
-                {
-                    Console.WriteLine("N. de tarjeta: {0}", item.numeroTarjeta);
-                    Console.WriteLine("Nombre: {0}", item.nombre);
-                    Console.WriteLine("Apellido: {0}", item.apellido);
-                    Console.WriteLine("Saldo: {0}", item.saldo);
-                    Console.WriteLine("Contrasena: {0}", item.contrasenya);
-                    if (item.isAdmin)
-                    {
-                        Console.WriteLine("Es administrador");
-                    }
-                    else
-                    {
-                        Console.WriteLine("No es administrador");
-                    }
-
-
-                    if (item.isActive)
-                    {
-                        Console.WriteLine("Esta activo");
-                    }
-                    else
-                    {
-                        Console.WriteLine("No esta activo");
-                    }
-                    Console.WriteLine("");
-                }
-            }
-            catch (Exception exp)
-            {
-                Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al menu principal.", exp.Message);
-                Console.ReadKey();
             }
         }
         public static void verLogTrans(List<Usuarios> Lista, Usuarios User)
@@ -839,6 +822,7 @@ namespace Prueba_Trabajo_Final
             {
                 Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al menu.", exp.Message);
                 Console.ReadKey();
+                Console.Clear();
                 menuAdmin(Lista, User);
             }
         }
@@ -925,6 +909,7 @@ namespace Prueba_Trabajo_Final
             {
                 Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al menu.", exp.Message);
                 Console.ReadKey();
+                Console.Clear();
                 menuAdmin(Lista, User);
             }
         }
@@ -983,6 +968,7 @@ namespace Prueba_Trabajo_Final
                     default:
                         Console.WriteLine("Seleccione solo dentro de las opciones dadas. Presione cualquier tecla para volver al menu.");
                         Console.ReadKey();
+                        Console.Clear();
                         menuAdmin(Lista, User);
                         break;
 
@@ -1000,6 +986,7 @@ namespace Prueba_Trabajo_Final
                 Console.WriteLine("Error: {0}", exp.Message);
                 Console.WriteLine("Presione cualquier tecla para volver al menu principal.");
                 Console.ReadKey();
+                Console.Clear();
                 menuAdmin(Lista, User);
             }
         }
@@ -1070,11 +1057,15 @@ namespace Prueba_Trabajo_Final
             {
                 Console.WriteLine("Tipo de dato ingresado equivocado.");
                 Console.WriteLine("Presione cualquier tecla para volver al menu principal.");
+                Console.ReadKey();
+                Console.Clear();
+                menuAdmin(Lista, User);
             }
             catch (Exception exp)
             {
                 Console.WriteLine("Error: {0}. Presione cualquier tecla para volver al menu principal.", exp.Message);
                 Console.ReadKey();
+                Console.Clear();
                 menuAdmin(Lista, User);
             }
 
@@ -1255,6 +1246,5 @@ namespace Prueba_Trabajo_Final
         }
 
         
-
     }
 }
